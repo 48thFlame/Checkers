@@ -50,8 +50,8 @@ const (
 type BoardSlot uint8
 
 const (
-	NaS BoardSlot = iota // Not A Spot
-	Empty
+	NaS   BoardSlot = iota // Not A Spot (a light square)
+	Empty                  // an unoccupied dark square
 	BluePiece
 	BlueKing
 	RedPiece
@@ -122,6 +122,16 @@ func NewBoard() Board {
 		NaS, RedPiece, NaS, RedPiece, NaS, RedPiece, NaS, RedPiece,
 		RedPiece, NaS, RedPiece, NaS, RedPiece, NaS, RedPiece, NaS,
 	}
+	// return Board{
+	// 	NaS, BluePiece, NaS, Empty, NaS, Empty, NaS, Empty,
+	// 	Empty, NaS, Empty, NaS, Empty, NaS, Empty, NaS,
+	// 	NaS, Empty, NaS, Empty, NaS, Empty, NaS, Empty,
+	// 	Empty, NaS, Empty, NaS, Empty, NaS, Empty, NaS,
+	// 	NaS, Empty, NaS, Empty, NaS, Empty, NaS, Empty,
+	// 	Empty, NaS, Empty, NaS, Empty, NaS, Empty, NaS,
+	// 	NaS, Empty, NaS, Empty, NaS, Empty, NaS, Empty,
+	// 	Empty, NaS, Empty, NaS, RedPiece, NaS, Empty, NaS,
+	// }
 }
 
 // String() returns a pretty-print of the board
@@ -177,9 +187,11 @@ const (
 )
 
 type Move struct {
-	piece  BoardSlot
 	startI int
 	endI   int
+	// whether or not the piece who moved is king
+	// (not if should become king, but rather was he king in the beginning)
+	king bool
 
 	capturedPiecesI []int
 }
@@ -192,35 +204,57 @@ func (g Game) GetLegalMoves() []Move {
 	for i := 1; i < BoardSize-1; i++ {
 		slot := g.Board[i]
 
-		switch g.Turn {
-		case BluePlayer:
-			if slot == BluePiece || slot == BlueKing {
-				// If it's blue, it's top going **down**
-				downLeftI := i + downLeftCalc
-				downRightI := i + downRightCalc
+		if slot == NaS || slot == Empty {
+			continue
+		}
 
-				if downLeftI < BoardSize && g.Board[downLeftI] == Empty {
-					moves = append(moves, Move{piece: BluePiece, startI: i, endI: downLeftI})
-				}
+		if (g.Turn == BluePlayer && slot == BlueKing) ||
+			(g.Turn == RedPlayer && slot == RedKing) {
 
-				if downRightI < BoardSize && g.Board[downRightI] == Empty {
-					moves = append(moves, Move{piece: BluePiece, startI: i, endI: downRightI})
-				}
+			upLeftI := i + upLeftCalc
+			upRightI := i + upRightCalc
+			downLeftI := i + downLeftCalc
+			downRightI := i + downRightCalc
 
+			if downLeftI < BoardSize && g.Board[downLeftI] == Empty {
+				moves = append(moves, Move{startI: i, endI: downLeftI, king: true})
 			}
-		case RedPlayer:
-			if slot == RedPiece || slot == RedKing {
-				// If it's red, it's bottom going **up**
-				upLeftI := i + upLeftCalc
-				upRightI := i + upRightCalc
 
-				if upLeftI > 0 && g.Board[upLeftI] == Empty {
-					moves = append(moves, Move{piece: RedPiece, startI: i, endI: upLeftI})
-				}
+			if downRightI < BoardSize && g.Board[downRightI] == Empty {
+				moves = append(moves, Move{startI: i, endI: downRightI, king: true})
+			}
 
-				if upRightI > 0 && g.Board[upRightI] == Empty {
-					moves = append(moves, Move{piece: RedPiece, startI: i, endI: upRightI})
-				}
+			if upLeftI > 0 && g.Board[upLeftI] == Empty {
+				moves = append(moves, Move{startI: i, endI: upLeftI, king: true})
+			}
+
+			if upRightI > 0 && g.Board[upRightI] == Empty {
+				moves = append(moves, Move{startI: i, endI: upRightI, king: true})
+			}
+
+		} else if g.Turn == BluePlayer && slot == BluePiece {
+			// If it's blue, it's top going **down**
+			downLeftI := i + downLeftCalc
+			downRightI := i + downRightCalc
+
+			if downLeftI < BoardSize && g.Board[downLeftI] == Empty {
+				moves = append(moves, Move{startI: i, endI: downLeftI})
+			}
+
+			if downRightI < BoardSize && g.Board[downRightI] == Empty {
+				moves = append(moves, Move{startI: i, endI: downRightI})
+			}
+		} else if g.Turn == RedPlayer && slot == RedPiece {
+			// If it's red, it's bottom going **up**
+			upLeftI := i + upLeftCalc
+			upRightI := i + upRightCalc
+
+			if upLeftI > 0 && g.Board[upLeftI] == Empty {
+				moves = append(moves, Move{startI: i, endI: upLeftI})
+			}
+
+			if upRightI > 0 && g.Board[upRightI] == Empty {
+				moves = append(moves, Move{startI: i, endI: upRightI})
 			}
 		}
 	}
@@ -228,14 +262,46 @@ func (g Game) GetLegalMoves() []Move {
 	return moves
 }
 
+var (
+	blueBoardEnd = [...]int{56, 58, 60, 62}
+	redBoardEnd  = [...]int{1, 3, 5, 7}
+)
+
+func isOnEnd(plr Player, i int) bool {
+	switch plr {
+	case BluePlayer:
+		if isInSlice(i, blueBoardEnd[:]) {
+			return true
+		}
+	case RedPlayer:
+		if isInSlice(i, redBoardEnd[:]) {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (g *Game) PlayMove(m Move) {
 	g.Board[m.startI] = Empty
-	g.Board[m.endI] = m.piece
 
 	switch g.Turn {
 	case BluePlayer:
+		if m.king || isOnEnd(BluePlayer, m.endI) { // If just moved to an end - "King Me!"
+			g.Board[m.endI] = BlueKing
+		} else {
+			g.Board[m.endI] = BluePiece
+		}
+
 		g.Turn = RedPlayer
+
 	case RedPlayer:
+		if m.king || isOnEnd(RedPlayer, m.endI) {
+			g.Board[m.endI] = RedKing
+		} else {
+			g.Board[m.endI] = RedPiece
+		}
+
 		g.Turn = BluePlayer
 	}
 
