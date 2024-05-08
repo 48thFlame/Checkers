@@ -24,7 +24,7 @@ var (
 	// red goes up
 	redDirCalcs = [...]int{upLeftCalc, upRightCalc}
 
-	kingDirCalcs = [...]int{downLeftCalc, downRightCalc, upLeftCalc, downRightCalc}
+	kingDirCalcs = [...]int{downLeftCalc, downRightCalc, upLeftCalc, upRightCalc}
 )
 
 // these are needed to know when should become king
@@ -135,6 +135,10 @@ func getCaptures(b Board, i int, directionCalcs []int, enemyPieces []BoardSlot) 
 // GetLegalMoves returns a slice of all legal moves in position
 func (g Game) GetLegalMoves() []Move {
 	moves := make([]Move, 0)
+
+	if g.State != Playing {
+		return moves
+	}
 
 	// can the current player capture
 	canCapture := false

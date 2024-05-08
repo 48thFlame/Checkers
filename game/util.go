@@ -10,6 +10,7 @@ func isIn[T comparable](a T, s ...T) bool {
 	return false
 }
 
+// TODO: make better
 func isOnEnd(plr Player, i int) bool {
 	switch plr {
 	case BluePlayer:

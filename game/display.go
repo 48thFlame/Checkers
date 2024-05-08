@@ -54,7 +54,7 @@ func (s BoardSlot) String(coord int) (str string) {
 }
 
 // String() returns a pretty-print of the board
-func (b Board) String() string {
+func (g Game) String() string {
 	s := strings.Builder{}
 
 	for rowI := 0; rowI < BoardSideSize; rowI++ {
@@ -62,7 +62,7 @@ func (b Board) String() string {
 			for colI := 0; colI < BoardSideSize; colI++ {
 				//  i = cols_num * (row) + col
 				i := BoardSideSize*rowI + colI
-				slot := b[i]
+				slot := g.Board[i]
 
 				if j == 0 { // if the upper more row of row
 					s.WriteString(slot.String(i))
@@ -74,5 +74,15 @@ func (b Board) String() string {
 		}
 	}
 
+	switch g.State {
+	case Playing:
+		s.WriteString("Playing...\n")
+	case Draw:
+		s.WriteString("Its a draw.\n")
+	case BlueWon:
+		s.WriteString("Yay Blue!\n")
+	case RedWon:
+		s.WriteString("Red!!\n")
+	}
 	return s.String()
 }
