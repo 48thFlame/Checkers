@@ -2,44 +2,46 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
 
-	"github.com/48thFlame/Checkers/game"
+	"github.com/48thFlame/Checkers/ai"
+	"github.com/48thFlame/Checkers/checkers"
 )
 
-func playUntilCant(g *game.Game) {
-	for moves := g.GetLegalMoves(); len(moves) != 0; moves = g.GetLegalMoves() {
-		fmt.Println(moves)
+type moveInputFunc func(checkers.Game) checkers.Move
 
-		randomMove := moves[rand.Intn(len(moves))]
-		fmt.Println(randomMove)
-		g.PlayMove(randomMove)
-		fmt.Print(g.Board)
+func playGame(plr1blue, plr2red moveInputFunc, shouldPrint bool) *checkers.Game {
+	g := checkers.NewGame()
 
+	for g.State == checkers.Playing {
+		var move checkers.Move
+
+		switch g.PlrTurn {
+		case checkers.BluePlayer:
+			move = plr1blue(*g)
+		case checkers.RedPlayer:
+			move = plr2red(*g)
+		}
+
+		if shouldPrint {
+			fmt.Print(g)
+			fmt.Println("Move:", move)
+		}
+
+		g.PlayMove(move)
 	}
-	fmt.Println("Done")
-	fmt.Println(g.GetLegalMoves())
 
-}
+	fmt.Print(g)
 
-func playNMoves(g *game.Game, n int) {
-	var moves []game.Move
-
-	for j := 0; j < n; j++ {
-		moves = g.GetLegalMoves()
-		fmt.Println(moves)
-
-		randomMove := moves[rand.Intn(len(moves))]
-		fmt.Println(randomMove)
-		g.PlayMove(randomMove)
-		fmt.Print(g.Board)
-	}
+	return g
 }
 
 func main() {
-	g := game.NewGame()
-	fmt.Print(g.Board)
+	g := checkers.NewGame()
 
-	playUntilCant(g)
-	// playNMoves(g, 20)
+	for n := 1; g.State != checkers.Draw; n++ {
+		g = playGame(ai.RandomAi, ai.RandomAi, false)
+		fmt.Println(g.TimeSinceExcitingMove)
+
+		fmt.Println("Game num:", n)
+	}
 }

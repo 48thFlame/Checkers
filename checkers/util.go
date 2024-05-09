@@ -1,4 +1,4 @@
-package game
+package checkers
 
 func isIn[T comparable](a T, s ...T) bool {
 	for _, v := range s {
@@ -14,13 +14,10 @@ func isIn[T comparable](a T, s ...T) bool {
 func isOnEnd(plr Player, i int) bool {
 	switch plr {
 	case BluePlayer:
-		if isIn(i, bottomBoardEndI[:]...) {
-			return true
-		}
+		return isIn(i, bottomBoardEndI[:]...)
+
 	case RedPlayer:
-		if isIn(i, topBoardEndI[:]...) {
-			return true
-		}
+		return isIn(i, topBoardEndI[:]...)
 	}
 
 	return false

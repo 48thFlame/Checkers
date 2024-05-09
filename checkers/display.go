@@ -1,4 +1,4 @@
-package game
+package checkers
 
 import (
 	"fmt"
@@ -74,15 +74,7 @@ func (g Game) String() string {
 		}
 	}
 
-	switch g.State {
-	case Playing:
-		s.WriteString("Playing...\n")
-	case Draw:
-		s.WriteString("Its a draw.\n")
-	case BlueWon:
-		s.WriteString("Yay Blue!\n")
-	case RedWon:
-		s.WriteString("Red!!\n")
-	}
+	s.WriteString(string(g.State))
+	s.WriteRune('\n')
 	return s.String()
 }

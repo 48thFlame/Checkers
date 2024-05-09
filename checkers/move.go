@@ -1,4 +1,4 @@
-package game
+package checkers
 
 /*
 Safe to check also edges because if its really an edge and cant go to a side,
@@ -34,20 +34,15 @@ var (
 	bottomBoardEndI = [...]int{56, 58, 60, 62}
 )
 
-var (
-	redPieces  = [...]BoardSlot{RedPiece, RedKing}
-	bluePieces = [...]BoardSlot{BluePiece, BlueKing}
-)
-
 func newMove(startI, endI int, capturedI ...int) Move {
-	return Move{startI: startI, endI: endI, capturedPiecesI: capturedI}
+	return Move{StartI: startI, EndI: endI, CapturedPiecesI: capturedI}
 }
 
 type Move struct {
-	startI int
-	endI   int
+	StartI int
+	EndI   int
 
-	capturedPiecesI []int
+	CapturedPiecesI []int
 }
 
 // returns a slot and its I (after calc)
@@ -122,7 +117,7 @@ func getCaptures(b Board, i int, directionCalcs []int, enemyPieces []BoardSlot) 
 				// join em all
 				for _, slc := range secondLevelCaptures {
 					captures = append(captures,
-						newMove(i, slc.endI, append(slc.capturedPiecesI, eatI)...))
+						newMove(i, slc.EndI, append(slc.CapturedPiecesI, eatI)...))
 				}
 			} else {
 				captures = append(captures, newMove(i, landI, eatI))
@@ -162,14 +157,14 @@ func (g Game) GetLegalMoves() []Move {
 				continue
 			}
 
-			enemyPieces = redPieces[:]
+			enemyPieces = RedPieces[:]
 		case RedPlayer:
 			directionsToUse, good = getDirectionsToUse(RedPlayer, slot)
 			if !good {
 				continue
 			}
 
-			enemyPieces = bluePieces[:]
+			enemyPieces = BluePieces[:]
 		}
 
 		captures := getCaptures(g.Board, i, directionsToUse, enemyPieces)

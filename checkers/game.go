@@ -1,6 +1,4 @@
-package game
-
-// TODO: decide what should actually be global
+package checkers
 
 type Player uint8
 
@@ -9,13 +7,13 @@ const (
 	RedPlayer
 )
 
-type GameState uint8
+type GameState string
 
 const (
-	Playing GameState = iota
-	BlueWon
-	RedWon
-	Draw
+	Playing GameState = "Playing..."
+	BlueWon GameState = "Yay Blue!"
+	RedWon  GameState = "Red!!!!"
+	Draw    GameState = "Its a draw."
 )
 
 type BoardSlot uint8
@@ -27,6 +25,11 @@ const (
 	BlueKing
 	RedPiece
 	RedKing
+)
+
+var (
+	RedPieces  = [...]BoardSlot{RedPiece, RedKing}
+	BluePieces = [...]BoardSlot{BluePiece, BlueKing}
 )
 
 const (
@@ -108,41 +111,41 @@ type Game struct {
 	PlrTurn Player // who's the current player's turn
 	Board   Board
 
-	// these are to check draw condition
+	// this is to check draw condition
 	TimeSinceExcitingMove int // time since capture/non-king move
 }
 
 func (g *Game) PlayMove(m Move) {
 	switch g.PlrTurn {
 	case BluePlayer:
-		if isOnEnd(BluePlayer, m.endI) { // If just moved to an end - "King Me!"
-			g.Board[m.endI] = BlueKing
+		if isOnEnd(BluePlayer, m.EndI) { // If just moved to an end - "King Me!"
+			g.Board[m.EndI] = BlueKing
 		} else {
-			g.Board[m.endI] = g.Board[m.startI]
+			g.Board[m.EndI] = g.Board[m.StartI]
 		}
 
 		g.PlrTurn = RedPlayer
 
 	case RedPlayer:
-		if isOnEnd(RedPlayer, m.endI) {
-			g.Board[m.endI] = RedKing
+		if isOnEnd(RedPlayer, m.EndI) {
+			g.Board[m.EndI] = RedKing
 		} else {
-			g.Board[m.endI] = g.Board[m.startI]
+			g.Board[m.EndI] = g.Board[m.StartI]
 		}
 
 		g.PlrTurn = BluePlayer
 	}
 
-	if isIn(g.Board[m.startI], RedPiece, BluePiece) || len(m.capturedPiecesI) > 0 {
+	if isIn(g.Board[m.StartI], RedPiece, BluePiece) || len(m.CapturedPiecesI) > 0 {
 		// if its a piece move or a capture - exciting!
 		g.TimeSinceExcitingMove = 0
 	} else {
 		g.TimeSinceExcitingMove++
 	}
 
-	g.Board[m.startI] = Empty
+	g.Board[m.StartI] = Empty
 
-	for _, i := range m.capturedPiecesI {
+	for _, i := range m.CapturedPiecesI {
 		g.Board[i] = Empty
 	}
 
