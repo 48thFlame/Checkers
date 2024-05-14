@@ -1,14 +1,49 @@
 package ai
 
 import (
-	"math/rand"
+	"fmt"
 
 	"github.com/48thFlame/Checkers/checkers"
 )
 
-func RandomAi(g checkers.Game) checkers.Move {
-	moves := g.GetLegalMoves()
-	randomMove := moves[rand.Intn(len(moves))]
+func SmartAi(g checkers.Game) checkers.Move {
+	if g.State != checkers.Playing {
+		// ! should never get here
+		return checkers.Move{}
+	}
 
-	return randomMove
+	isBlueMaxingTurn := g.PlrTurn == checkers.BluePlayer
+
+	var bestEval float64
+
+	if isBlueMaxingTurn {
+		bestEval = lowestE
+	} else {
+		bestEval = highestE
+	}
+
+	var bestMove checkers.Move
+
+	legalMoves := g.GetLegalMoves()
+	for _, move := range legalMoves {
+		gameAfterMovePlayed := g
+		(&gameAfterMovePlayed).PlayMove(move)
+		eval := minMax(gameAfterMovePlayed, 8, lowestE, highestE)
+
+		if isBlueMaxingTurn {
+			if eval > bestEval {
+				bestEval = eval
+				bestMove = move
+			}
+		} else {
+			if eval < bestEval {
+				bestEval = eval
+				bestMove = move
+			}
+		}
+	}
+
+	fmt.Printf("bestEval: %v\n", bestEval)
+
+	return bestMove
 }
