@@ -6,44 +6,47 @@ import (
 	"github.com/48thFlame/Checkers/checkers"
 )
 
-func SmartAi(g checkers.Game) checkers.Move {
-	if g.State != checkers.Playing {
-		// ! should never get here
-		return checkers.Move{}
-	}
+type moveEval struct {
+	move checkers.Move
+	eval int
+}
 
-	isBlueMaxingTurn := g.PlrTurn == checkers.BluePlayer
+func (me moveEval) String() string {
+	return fmt.Sprintf("(%d,%d|%d)",
+		me.move.StartI, me.move.EndI, me.eval)
+}
 
-	var bestEval float64
-
-	if isBlueMaxingTurn {
-		bestEval = lowestE
-	} else {
-		bestEval = highestE
-	}
-
-	var bestMove checkers.Move
+func calculateAllMoves(g *checkers.Game, depth uint) []moveEval {
+	moveEvals := make([]moveEval, 0)
 
 	legalMoves := g.GetLegalMoves()
-	for _, move := range legalMoves {
-		gameAfterMovePlayed := g
-		(&gameAfterMovePlayed).PlayMove(move)
-		eval := minMax(gameAfterMovePlayed, 8, lowestE, highestE)
 
-		if isBlueMaxingTurn {
-			if eval > bestEval {
-				bestEval = eval
-				bestMove = move
-			}
-		} else {
-			if eval < bestEval {
-				bestEval = eval
-				bestMove = move
-			}
-		}
+	depth-- // because playing a move and then min-max
+
+	for _, move := range legalMoves {
+		futureGame := *g
+		(&futureGame).PlayMove(move)
+
+		eval := minMax(futureGame, depth, lowestE, highestE)
+		moveEvals = append(moveEvals, moveEval{move: move, eval: eval})
 	}
 
-	fmt.Printf("bestEval: %v\n", bestEval)
+	return moveEvals
+}
+
+func SmartAi(g checkers.Game) (bestMove checkers.Move) {
+	moveEvals := calculateAllMoves(&g, 7)
+	sortMoveEvalsHighToLow(moveEvals)
+
+	if g.PlrTurn == checkers.BluePlayer {
+		// take first move
+		bestMove = moveEvals[0].move
+	} else {
+		// red wants lowest so take last
+		bestMove = moveEvals[len(moveEvals)-1].move
+	}
+
+	fmt.Printf("%v>%v\n", moveEvals, bestMove)
 
 	return bestMove
 }

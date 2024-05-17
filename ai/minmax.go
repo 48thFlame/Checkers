@@ -1,45 +1,47 @@
 package ai
 
 import (
-	"math"
-
 	"github.com/48thFlame/Checkers/checkers"
 )
 
 const (
-	highestE = 1000
+	highestE = 100_000
 	lowestE  = highestE * -1
 
-	blueWonE = 100
+	blueWonE = 10_000
 	redWonE  = blueWonE * -1
 	drawE    = 0
+
+	pieceWeightE = 10
+	kingWeightE  = 15
 )
 
 type pieceCount struct {
-	bp, bk float64
-	rb, rk float64
+	bPieces, bKings int
+	rPieces, rKings int
 }
 
-func evaluatePosition(g checkers.Game) float64 {
+func evaluatePosition(g checkers.Game) int {
 	pc := pieceCount{}
 
 	for _, slot := range g.Board {
 		switch slot {
 		case checkers.BluePiece:
-			pc.bp++
+			pc.bPieces++
 		case checkers.BlueKing:
-			pc.bk++
+			pc.bKings++
 		case checkers.RedPiece:
-			pc.rb++
+			pc.rPieces++
 		case checkers.RedKing:
-			pc.rk++
+			pc.rKings++
 		}
 	}
 
-	return pc.bp + (pc.bk * 1.5) - pc.rb - (pc.rk * 1.5)
+	return (pc.bPieces * pieceWeightE) + (pc.bKings * kingWeightE) -
+		(pc.rPieces * pieceWeightE) - (pc.rKings * kingWeightE)
 }
 
-func gameOverEval(g checkers.Game) float64 {
+func gameOverEval(g checkers.Game) int {
 	switch g.State {
 	case checkers.Draw:
 		return drawE
@@ -53,7 +55,7 @@ func gameOverEval(g checkers.Game) float64 {
 	return 0
 }
 
-func minMax(g checkers.Game, depth uint, alpha, beta float64) (eval float64) {
+func minMax(g checkers.Game, depth uint, alpha, beta int) (eval int) {
 	if g.State != checkers.Playing {
 		return gameOverEval(g)
 	}
@@ -72,9 +74,9 @@ func minMax(g checkers.Game, depth uint, alpha, beta float64) (eval float64) {
 			(&futureGame).PlayMove(move)
 			currentMoveEval := minMax(futureGame, depth-1, alpha, beta)
 
-			eval = math.Max(currentMoveEval, eval)
+			eval = max(currentMoveEval, eval)
 
-			alpha = math.Max(alpha, currentMoveEval)
+			alpha = max(alpha, currentMoveEval)
 			if beta <= alpha {
 				// Red had a better option in previous branches
 				break
@@ -91,9 +93,9 @@ func minMax(g checkers.Game, depth uint, alpha, beta float64) (eval float64) {
 			(&futureGame).PlayMove(move)
 			currentMoveEval := minMax(futureGame, depth-1, alpha, beta)
 
-			eval = math.Min(currentMoveEval, eval)
+			eval = min(currentMoveEval, eval)
 
-			beta = math.Min(beta, currentMoveEval)
+			beta = min(beta, currentMoveEval)
 			if beta <= alpha {
 				// Blue had better option in previous branches
 				break
