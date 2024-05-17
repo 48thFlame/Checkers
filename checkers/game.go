@@ -149,10 +149,10 @@ func (g *Game) PlayMove(m Move) {
 		g.Board[i] = Empty
 	}
 
-	g.State = g.GetGameState()
+	g.State = g.getGameState()
 }
 
-func (g Game) GetGameState() GameState {
+func (g *Game) getGameState() GameState {
 	legalMoves := g.GetLegalMoves()
 	if len(legalMoves) == 0 {
 		// if someone cant make a move - game over, other player wins

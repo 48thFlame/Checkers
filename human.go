@@ -8,6 +8,16 @@ import (
 	"github.com/48thFlame/Checkers/checkers"
 )
 
+func isIn[T comparable](a T, s ...T) bool {
+	for _, v := range s {
+		if v == a {
+			return true
+		}
+	}
+
+	return false
+}
+
 func validI(i int) bool {
 	return 0 < i && i < checkers.BoardSize
 }
@@ -62,11 +72,11 @@ func _readHumanMoveInput(g checkers.Game) (checkers.Move, error) {
 	return checkers.Move{}, errors.New("sorry no such legal move")
 }
 
-func humanMove(g checkers.Game) checkers.Move {
+func HumanMove(g checkers.Game) checkers.Move {
 	m, err := _readHumanMoveInput(g)
 	if err != nil {
 		fmt.Println("Error !!:", err)
-		return humanMove(g)
+		return HumanMove(g)
 	}
 
 	return m

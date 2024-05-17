@@ -128,7 +128,7 @@ func getCaptures(b Board, i int, directionCalcs []int, enemyPieces []BoardSlot) 
 }
 
 // GetLegalMoves returns a slice of all legal moves in position
-func (g Game) GetLegalMoves() []Move {
+func (g *Game) GetLegalMoves() []Move {
 	moves := make([]Move, 0)
 
 	if g.State != Playing {

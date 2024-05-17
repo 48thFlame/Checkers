@@ -57,6 +57,9 @@ func (s BoardSlot) String(coord int) (str string) {
 func (g Game) String() string {
 	s := strings.Builder{}
 
+	s.WriteString(string(g.State))
+	s.WriteRune('\n')
+
 	for rowI := 0; rowI < BoardSideSize; rowI++ {
 		for j := 0; j < 2; j++ {
 			for colI := 0; colI < BoardSideSize; colI++ {
@@ -74,7 +77,5 @@ func (g Game) String() string {
 		}
 	}
 
-	s.WriteString(string(g.State))
-	s.WriteRune('\n')
 	return s.String()
 }
