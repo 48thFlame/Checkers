@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"math/rand"
 
-	"github.com/48thFlame/Checkers/ai"
 	"github.com/48thFlame/Checkers/checkers"
+	"github.com/48thFlame/Checkers/simpleAi"
 )
 
 type moveInputFunc func(checkers.Game) checkers.Move
@@ -75,27 +75,15 @@ func TestAisMultipleGames(plr1blue, plr2red moveInputFunc, n int) {
 func main() {
 	// g := checkers.NewGame()
 	// fmt.Print(g)
-	// fmt.Println(ai.MinMax(*g, 4, -100000, 100000))
-	// fmt.Println(ai.EvaluatePosition(*g))
+	// fmt.Println("SimpleEval:", simpleAi.EvaluatePosition(*g))
+	// fmt.Println("SmartEval:", ai.EvaluatePosition(*g))
 
-	// for n := 1; g.State != checkers.Draw; n++ {
-	// 	g = playGame(ai.RandomAi, ai.RandomAi, false)
-	// 	fmt.Println(g.TimeSinceExcitingMove)
+	PlayGame(simpleAi.SimpleAi, simpleAi.SimpleAi, true)
 
-	// 	fmt.Println("Game num:", n)
-	// }
-	// playGame(humanMove, humanMove, true)
-
-	// for n := 1; g.State != checkers.Draw; n++ {
-	// 	g = playGame(ai.RandomAi, ai.RandomAi, false)
-	// 	fmt.Println(g.TimeSinceExcitingMove)
-
-	// 	fmt.Println("Game num:", n)
-	// }
-	// playGame(randomAi, ai.SmartAi, true)
-	PlayGame(ai.SmartAi, RandomAi, true)
-	// playGame(ai.SmartAi, humanMove, true)
-	// testAisMultipleGames(ai.SmartAi, ai.SmartAi, 10)
-	// playGame(ai.SmartAi, ai.SmartAi, true)
-
+	// TestAisMultipleGames(simpleAi.SimpleAi, simpleAi.SimpleAi, 10)
+	// PlayGame(HumanMove, simpleAi.SimpleAi, true)
+	// TestAisMultipleGames(ai.SmartAi, simpleAi.SimpleAi, 100)
+	// PlayGame(ai.SmartAi, ai.SmartAi, true)
+	// PlayGame(simpleAi.SimpleAi, ai.SmartAi, true)
+	// PlayGame(ai.SmartAi, simpleAi.SimpleAi, true)
 }

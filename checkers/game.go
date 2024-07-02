@@ -62,6 +62,28 @@ func NewBoard() Board {
 		RedPiece, NaS, RedPiece, NaS, RedPiece, NaS, RedPiece, NaS,
 	}
 	// return Board{
+	// 	// one king
+	// 	NaS, Empty, NaS, Empty, NaS, Empty, NaS, Empty,
+	// 	Empty, NaS, Empty, NaS, Empty, NaS, Empty, NaS,
+	// 	NaS, Empty, NaS, Empty, NaS, Empty, NaS, Empty,
+	// 	Empty, NaS, Empty, NaS, Empty, NaS, Empty, NaS,
+	// 	NaS, Empty, NaS, BlueKing, NaS, Empty, NaS, Empty,
+	// 	Empty, NaS, Empty, NaS, Empty, NaS, Empty, NaS,
+	// 	NaS, Empty, NaS, Empty, NaS, Empty, NaS, Empty,
+	// 	Empty, NaS, Empty, NaS, Empty, NaS, Empty, NaS,
+	// }
+	// return Board{
+	// 	// end game
+	// 	NaS, Empty, NaS, RedKing, NaS, Empty, NaS, Empty,
+	// 	Empty, NaS, RedKing, NaS, RedKing, NaS, Empty, NaS,
+	// 	NaS, Empty, NaS, Empty, NaS, Empty, NaS, Empty,
+	// 	Empty, NaS, Empty, NaS, Empty, NaS, Empty, NaS,
+	// 	NaS, Empty, NaS, BlueKing, NaS, Empty, NaS, Empty,
+	// 	Empty, NaS, BlueKing, NaS, Empty, NaS, Empty, NaS,
+	// 	NaS, Empty, NaS, Empty, NaS, Empty, NaS, Empty,
+	// 	Empty, NaS, Empty, NaS, Empty, NaS, Empty, NaS,
+	// }
+	// return Board{
 	// 	// complex position
 	// 	NaS, Empty, NaS, RedKing, NaS, Empty, NaS, BluePiece,
 	// 	BluePiece, NaS, Empty, NaS, Empty, NaS, BluePiece, NaS,

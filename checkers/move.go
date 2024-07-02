@@ -20,11 +20,11 @@ const (
 
 var (
 	// blue goes down
-	blueDirCalcs = [...]int{downLeftCalc, downRightCalc}
+	BlueDirCalcs = [...]int{downLeftCalc, downRightCalc}
 	// red goes up
-	redDirCalcs = [...]int{upLeftCalc, upRightCalc}
+	RedDirCalcs = [...]int{upLeftCalc, upRightCalc}
 
-	kingDirCalcs = [...]int{downLeftCalc, downRightCalc, upLeftCalc, upRightCalc}
+	KingDirCalcs = [...]int{downLeftCalc, downRightCalc, upLeftCalc, upRightCalc}
 )
 
 // these are needed to know when should become king
@@ -62,18 +62,18 @@ func getDirectionsToUse(plr Player, slot BoardSlot) (directionsToUse []int, matc
 	switch plr {
 	case BluePlayer:
 		if slot == BluePiece {
-			directionsToUse = blueDirCalcs[:]
+			directionsToUse = BlueDirCalcs[:]
 			match = true
 		} else if slot == BlueKing {
-			directionsToUse = kingDirCalcs[:]
+			directionsToUse = KingDirCalcs[:]
 			match = true
 		}
 	case RedPlayer:
 		if slot == RedPiece {
-			directionsToUse = redDirCalcs[:]
+			directionsToUse = RedDirCalcs[:]
 			match = true
 		} else if slot == RedKing {
-			directionsToUse = kingDirCalcs[:]
+			directionsToUse = KingDirCalcs[:]
 			match = true
 		}
 	}
@@ -82,7 +82,7 @@ func getDirectionsToUse(plr Player, slot BoardSlot) (directionsToUse []int, matc
 }
 
 // get legal *moving* moves
-func getMovings(b Board, i int, dirCalcs []int) []Move {
+func GetMovings(b Board, i int, dirCalcs []int) []Move {
 	moves := make([]Move, 0)
 
 	for _, dc := range dirCalcs {
@@ -97,7 +97,7 @@ func getMovings(b Board, i int, dirCalcs []int) []Move {
 }
 
 // get legal capturing moves
-func getCaptures(b Board, i int, directionCalcs []int, enemyPieces []BoardSlot) []Move {
+func GetCaptures(b Board, i int, directionCalcs []int, enemyPieces []BoardSlot) []Move {
 	captures := make([]Move, 0)
 
 	for _, dirCalc := range directionCalcs {
@@ -111,7 +111,7 @@ func getCaptures(b Board, i int, directionCalcs []int, enemyPieces []BoardSlot) 
 			b[eatI] = Empty
 
 			// check for new captures in new position, then join em all
-			secondLevelCaptures := getCaptures(b, landI, directionCalcs, enemyPieces)
+			secondLevelCaptures := GetCaptures(b, landI, directionCalcs, enemyPieces)
 
 			if len(secondLevelCaptures) > 0 {
 				// join em all
@@ -167,7 +167,7 @@ func (g *Game) GetLegalMoves() []Move {
 			enemyPieces = BluePieces[:]
 		}
 
-		captures := getCaptures(g.Board, i, directionsToUse, enemyPieces)
+		captures := GetCaptures(g.Board, i, directionsToUse, enemyPieces)
 		capturesLen := len(captures)
 		if capturesLen > 0 {
 			if !canCapture {
@@ -182,7 +182,7 @@ func (g *Game) GetLegalMoves() []Move {
 
 		if !canCapture {
 			// because if can capture can't move
-			moves = append(moves, getMovings(g.Board, i, directionsToUse)...)
+			moves = append(moves, GetMovings(g.Board, i, directionsToUse)...)
 		}
 	}
 
