@@ -12,7 +12,7 @@ type moveEval struct {
 }
 
 func (me moveEval) String() string {
-	return fmt.Sprintf("(%d,%d|%d)",
+	return fmt.Sprintf("[%d,%d|%d]",
 		me.move.StartI, me.move.EndI, me.eval)
 }
 
@@ -45,20 +45,21 @@ func calculateAllMoves(g *checkers.Game, depth uint) []moveEval {
 	return moveEvals
 }
 
-func SimpleAi(g checkers.Game) (bestMove checkers.Move) {
+func SimpleAi(g checkers.Game) checkers.Move {
 	moveEvals := calculateAllMoves(&g, 8)
 	sortMoveEvalsHighToLow(moveEvals)
 
+	var bestMoveEval moveEval
+
 	if g.PlrTurn == checkers.BluePlayer {
 		// take first move
-		bestMove = moveEvals[0].move
+		bestMoveEval = moveEvals[0]
 	} else {
 		// red wants lowest so take last
-		bestMove = moveEvals[len(moveEvals)-1].move
+		bestMoveEval = moveEvals[len(moveEvals)-1]
 	}
 
-	// fmt.Println("simpleE:", eval)
-	// fmt.Printf("%v>%v\n", moveEvals, bestMove)
+	fmt.Println(bestMoveEval)
 
-	return bestMove
+	return bestMoveEval.move
 }
