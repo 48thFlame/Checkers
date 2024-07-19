@@ -16,7 +16,7 @@ func (me moveEval) String() string {
 		me.move.StartI, me.move.EndI, me.eval)
 }
 
-func calculateAllMoves(g *checkers.Game, depth uint) []moveEval {
+func calculateAllMoves(g *checkers.Game, depth int) []moveEval {
 	moveEvalsChannel := make(chan moveEval)
 
 	legalMoves := g.GetLegalMoves()
@@ -28,7 +28,7 @@ func calculateAllMoves(g *checkers.Game, depth uint) []moveEval {
 		(&futureGame).PlayMove(move)
 
 		go func(m checkers.Move) {
-			eval := minMax(futureGame, depth, lowestE, highestE)
+			eval := minMax(futureGame, depth, depth, lowestE, highestE)
 			moveEvalsChannel <- moveEval{move: m, eval: eval}
 			// moveEvals = append(moveEvals, moveEval{move: move, eval: eval})
 		}(move)
@@ -58,7 +58,7 @@ func SmartAi(g checkers.Game) checkers.Move {
 		bestMoveEval = moveEvals[len(moveEvals)-1]
 	}
 
-	// fmt.Println(bestMoveEval)
+	fmt.Println(bestMoveEval)
 
 	return bestMoveEval.move
 }

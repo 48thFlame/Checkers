@@ -4,13 +4,21 @@ import (
 	"github.com/48thFlame/Checkers/checkers"
 )
 
-func minMax(g checkers.Game, depth uint, alpha, beta int) (eval int) {
+const (
+	piecesCapturedForEndGame = 24 - 8
+)
+
+func minMax(g checkers.Game, startDepth, currentDepth int, alpha, beta int) (eval int) {
 	if g.State != checkers.Playing {
-		return gameOverEval(g)
+		return gameOverEval(g, startDepth, currentDepth)
 	}
 
-	if depth == 0 {
-		return EvaluatePosition(g)
+	if currentDepth == 0 {
+		if g.NPiecesCaptured >= piecesCapturedForEndGame {
+			return EvaluateEndGamePos(g)
+		} else {
+			return EvaluateMidPosition(g)
+		}
 	}
 
 	legalMoves := g.GetLegalMoves()
@@ -21,7 +29,7 @@ func minMax(g checkers.Game, depth uint, alpha, beta int) (eval int) {
 		for _, move := range legalMoves {
 			futureGame := g
 			(&futureGame).PlayMove(move)
-			currentMoveEval := minMax(futureGame, depth-1, alpha, beta)
+			currentMoveEval := minMax(futureGame, startDepth, currentDepth-1, alpha, beta)
 
 			eval = max(currentMoveEval, eval)
 
@@ -40,7 +48,7 @@ func minMax(g checkers.Game, depth uint, alpha, beta int) (eval int) {
 		for _, move := range legalMoves {
 			futureGame := g
 			(&futureGame).PlayMove(move)
-			currentMoveEval := minMax(futureGame, depth-1, alpha, beta)
+			currentMoveEval := minMax(futureGame, startDepth, currentDepth-1, alpha, beta)
 
 			eval = min(currentMoveEval, eval)
 

@@ -9,26 +9,31 @@ import (
 	"github.com/fatih/color"
 )
 
-func max(a, b int) int {
-	if a > b {
-		return a
-	} else {
-		return b
-	}
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	} else {
-		return b
-	}
-}
-
 func sortMoveEvalsHighToLow(s []moveEval) {
 	sort.Slice(s, func(i, j int) bool {
 		return s[i].eval > s[j].eval
 	})
+}
+
+func iAbs(a int) int {
+	if a < 0 {
+		return -a
+	} else {
+		return a
+	}
+}
+
+func getManhattanDist(a, b int) int {
+	aCol := a % checkers.BoardSideSize
+	aRow := a / checkers.BoardSideSize
+
+	bCol := b % checkers.BoardSideSize
+	bRow := b / checkers.BoardSideSize
+
+	deltaCol := iAbs(aCol - bCol)
+	deltaRow := iAbs(aRow - bRow)
+
+	return deltaCol + deltaRow
 }
 
 func boardSlotToString(s checkers.BoardSlot, coord int, value bool) (str string) {
