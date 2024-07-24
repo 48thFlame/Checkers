@@ -61,7 +61,7 @@ func NewBoard() Board {
 		NaS, RedPiece, NaS, RedPiece, NaS, RedPiece, NaS, RedPiece,
 		RedPiece, NaS, RedPiece, NaS, RedPiece, NaS, RedPiece, NaS,
 	}
-	// // return Board{
+	// return Board{
 	// 	// one king
 	// 	NaS, Empty, NaS, Empty, NaS, Empty, NaS, Empty,
 	// 	Empty, NaS, Empty, NaS, Empty, NaS, Empty, NaS,
@@ -145,7 +145,7 @@ type Game struct {
 	State           GameState
 	PlrTurn         Player // who's the current player's turn
 	Board           Board
-	NPiecesCaptured uint
+	NPiecesCaptured int
 
 	// this is to check draw condition
 	TimeSinceExcitingMove int // time since capture/non-king move
@@ -201,9 +201,9 @@ func (g *Game) getGameState() GameState {
 		}
 	}
 
-	if g.TimeSinceExcitingMove >= 80 { // 40 turns
+	// if g.TimeSinceExcitingMove >= 80 { // 40 turns
 	// if g.TimeSinceExcitingMove >= 40 { // 20 turns - for testing
-	// if g.TimeSinceExcitingMove >= 24 { // 12 turns - for testing
+	if g.TimeSinceExcitingMove >= 24 { // 12 turns - for testing
 		return Draw
 	}
 

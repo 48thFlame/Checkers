@@ -7,13 +7,12 @@ import (
 const (
 	highestE = 199_999_999
 	lowestE  = highestE * -1
+)
 
+const (
 	blueWonE = 1_000_000
 	redWonE  = blueWonE * -1
 	drawE    = 0
-
-	pieceWeightE = 100
-	kingWeightE  = 150
 )
 
 func gameOverEval(g checkers.Game, startDepth, currentDepth int) int {
@@ -30,29 +29,34 @@ func gameOverEval(g checkers.Game, startDepth, currentDepth int) int {
 	return 0
 }
 
+const (
+	pieceWeightE = 90
+	kingWeightE  = 150
+)
+
 type heatMap [checkers.BoardSize]int
 
 var (
 	PiecesHeatMap = heatMap{
-		-0, 7, -0, 7, -0, 7, -0, 7,
-		1, -0, 0, -0, 0, -0, 0, -0,
-		-0, 4, -0, 5, -0, 5, -0, 3,
-		11, -0, 12, -0, 12, -0, 10, -0,
-		-0, 3, -0, 4, -0, 4, -0, 12,
-		5, -0, 1, -0, 1, -0, 1, -0,
-		-0, 20, -0, 20, -0, 20, -0, 20,
+		-0, 8, -0, 8, -0, 8, -0, 6,
+		2, -0, 2, -0, 2, -0, 1, -0,
+		-0, 6, -0, 6, -0, 6, -0, 6,
+		9, -0, 10, -0, 10, -0, 10, -0,
+		-0, 4, -0, 5, -0, 5, -0, 11,
+		3, -0, 0, -0, 0, -0, 0, -0,
+		-0, 25, -0, 30, -0, 30, -0, 20, // hoping doesn't end calculation when can be captured
 		0, -0, 0, -0, 0, -0, 0, -0,
 	}
 
 	KingHeatMap = heatMap{
-		-0, -3, -0, -10, -0, -11, -0, -12,
-		-3, -0, 4, -0, 3, -0, -1, -0,
-		-0, 4, -0, 8, -0, 8, -0, -11,
-		-10, -0, 13, -0, 13, -0, 7, -0,
-		-0, 7, -0, 13, -0, 13, -0, -10,
-		-11, -0, 8, -0, 8, -0, 4, -0,
-		-0, -1, -0, 3, -0, 4, -0, -3,
-		-12, -0, -11, -0, -10, -0, -3, -0,
+		-0, -4, -0, -5, -0, -5, -0, -5,
+		-4, -0, 2, -0, 2, -0, -1, -0,
+		-0, 3, -0, 5, -0, 5, -0, -3,
+		-3, -0, 6, -0, 6, -0, 4, -0,
+		-0, 4, -0, 6, -0, 6, -0, -3,
+		-3, -0, 5, -0, 5, -0, 3, -0,
+		-0, -1, -0, 2, -0, 2, -0, -4,
+		-5, -0, -5, -0, -5, -0, -4, -0,
 	}
 )
 
@@ -74,9 +78,9 @@ func EvaluateMidPosition(g checkers.Game) (eval int) {
 		case checkers.RedKing:
 			eval -= kingWeightE
 			eval -= KingHeatMap[checkers.BoardSize-1-slotI]
-
 		}
 	}
+
 	return eval
 }
 
@@ -88,12 +92,12 @@ const (
 var (
 	EndKingHeatMap = heatMap{
 		-0, 9, -0, -10, -0, -11, -0, -12,
-		9, -0, 1, -0, 0, -0, 0, -0,
+		9, -0, 1, -0, 0, -0, -2, -0,
 		-0, 1, -0, 2, -0, 2, -0, -10,
 		-10, -0, 2, -0, 2, -0, 0, -0,
 		-0, 0, -0, 2, -0, 2, -0, -10,
 		-11, -0, 2, -0, 2, -0, 1, -0,
-		-0, 0, -0, 0, -0, 1, -0, 9,
+		-0, -2, -0, 0, -0, 1, -0, 9,
 		-12, -0, -11, -0, -10, -0, 9, -0,
 	}
 )
@@ -108,10 +112,12 @@ func EvaluateEndGamePos(g checkers.Game) (eval int) {
 		switch slot {
 		case checkers.BluePiece:
 			nBlue++
+
 			eval += endPieceWeightE
 
 		case checkers.RedPiece:
 			nRed++
+
 			eval -= endPieceWeightE
 
 		case checkers.BlueKing:
@@ -140,7 +146,7 @@ func EvaluateEndGamePos(g checkers.Game) (eval int) {
 				dist = getManhattanDist(bki, rki)
 
 				if dist >= 2 {
-					distScore += 9 - dist // punish being far, reward close
+					distScore += 7 - dist // punish being far, reward close
 				}
 			}
 		}
