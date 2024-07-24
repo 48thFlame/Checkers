@@ -82,7 +82,7 @@ func getDirectionsToUse(plr Player, slot BoardSlot) (directionsToUse []int, matc
 }
 
 // get legal *moving* moves
-func GetMovings(b Board, i int, dirCalcs []int) []Move {
+func getMovingsForSlotI(b Board, i int, dirCalcs []int) []Move {
 	moves := make([]Move, 0)
 
 	for _, dc := range dirCalcs {
@@ -97,7 +97,7 @@ func GetMovings(b Board, i int, dirCalcs []int) []Move {
 }
 
 // get legal capturing moves
-func GetCaptures(b Board, i int, directionCalcs []int, enemyPieces []BoardSlot) []Move {
+func getCapturesForSlotI(b Board, i int, directionCalcs []int, enemyPieces []BoardSlot) []Move {
 	captures := make([]Move, 0)
 
 	for _, dirCalc := range directionCalcs {
@@ -111,7 +111,7 @@ func GetCaptures(b Board, i int, directionCalcs []int, enemyPieces []BoardSlot) 
 			b[eatI] = Empty
 
 			// check for new captures in new position, then join em all
-			secondLevelCaptures := GetCaptures(b, landI, directionCalcs, enemyPieces)
+			secondLevelCaptures := getCapturesForSlotI(b, landI, directionCalcs, enemyPieces)
 
 			if len(secondLevelCaptures) > 0 {
 				// join em all
@@ -167,7 +167,7 @@ func (g *Game) GetLegalMoves() []Move {
 			enemyPieces = BluePieces[:]
 		}
 
-		captures := GetCaptures(g.Board, i, directionsToUse, enemyPieces)
+		captures := getCapturesForSlotI(g.Board, i, directionsToUse, enemyPieces)
 		capturesLen := len(captures)
 		if capturesLen > 0 {
 			if !canCapture {
@@ -182,9 +182,49 @@ func (g *Game) GetLegalMoves() []Move {
 
 		if !canCapture {
 			// because if can capture can't move
-			moves = append(moves, GetMovings(g.Board, i, directionsToUse)...)
+			moves = append(moves, getMovingsForSlotI(g.Board, i, directionsToUse)...)
 		}
 	}
 
 	return moves
+}
+
+func (g *Game) CanCapture() bool {
+	if g.State != Playing {
+		return false
+	}
+
+	for i, slot := range g.Board {
+		if slot == NaS || slot == Empty {
+			continue
+		}
+
+		var directionsToUse []int
+		var good bool // is looking maybe at wrong slot because not thats player turn?
+		var enemyPieces []BoardSlot
+
+		switch g.PlrTurn {
+		case BluePlayer:
+			directionsToUse, good = getDirectionsToUse(BluePlayer, slot)
+			if !good {
+				continue
+			}
+
+			enemyPieces = RedPieces[:]
+		case RedPlayer:
+			directionsToUse, good = getDirectionsToUse(RedPlayer, slot)
+			if !good {
+				continue
+			}
+
+			enemyPieces = BluePieces[:]
+		}
+
+		captures := getCapturesForSlotI(g.Board, i, directionsToUse, enemyPieces)
+		if len(captures) > 0 {
+			return true // don't care what the captures are, just that canCapture
+		}
+	}
+
+	return false
 }

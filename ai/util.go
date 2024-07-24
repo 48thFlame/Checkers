@@ -3,6 +3,7 @@ package ai
 import (
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/48thFlame/Checkers/checkers"
@@ -102,3 +103,49 @@ func PrintHeatMap(hm heatMap, name string) {
 
 	fmt.Print(s.String())
 }
+
+func formatInt(n int) string {
+	in := strconv.FormatInt(int64(n), 10)
+	numOfDigits := len(in)
+	if n < 0 {
+		numOfDigits-- // First character is the - sign (not a digit)
+	}
+	numOfCommas := (numOfDigits - 1) / 3
+
+	out := make([]byte, len(in)+numOfCommas)
+	if n < 0 {
+		in, out[0] = in[1:], '-'
+	}
+
+	for i, j, k := len(in)-1, len(out)-1, 0; ; i, j = i-1, j-1 {
+		out[j] = in[i]
+		if i == 0 {
+			return string(out)
+		}
+		if k++; k == 3 {
+			j, k = j-1, 0
+			out[j] = ','
+		}
+	}
+}
+
+type minMaxStats struct {
+	calls          int
+	alphaBetaBreak int
+	extendedSearch int
+	midEval        int
+	endEval        int
+}
+
+func (mms minMaxStats) String() string {
+	s := strings.Builder{}
+	s.WriteString(fmt.Sprintf("calls: %v\n", formatInt(mms.calls)))
+	s.WriteString(fmt.Sprintf("alphaBetaBreak: %v\n", formatInt(mms.alphaBetaBreak)))
+	s.WriteString(fmt.Sprintf("extendedSearch: %v\n", formatInt(mms.extendedSearch)))
+	s.WriteString(fmt.Sprintf("midEval: %v\n", formatInt(mms.midEval)))
+	s.WriteString(fmt.Sprintf("endEval: %v\n", formatInt(mms.endEval)))
+
+	return s.String()
+}
+
+var MinMaxStatsMan = minMaxStats{}
