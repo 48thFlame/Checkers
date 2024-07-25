@@ -2,24 +2,24 @@ package ai
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/48thFlame/Checkers/checkers"
 )
 
 type moveEval struct {
-	move checkers.Move
-	eval int
+	depth int
+	move  checkers.Move
+	eval  int
 }
 
 func (me moveEval) String() string {
-	return fmt.Sprintf("(%d,%d|%d)",
-		me.move.StartI, me.move.EndI, me.eval)
+	return fmt.Sprintf("(%d| %d,%d |%d)",
+		me.depth, me.move.StartI, me.move.EndI, me.eval)
 }
 
-func calculateAllMoves(g *checkers.Game, depth int) []moveEval {
+func calculateAllMoves(g *checkers.Game, depth int, legalMoves []checkers.Move) []moveEval {
 	moveEvalsChannel := make(chan moveEval)
-
-	legalMoves := g.GetLegalMoves()
 
 	depth-- // because playing a move and then min-max
 
@@ -29,7 +29,7 @@ func calculateAllMoves(g *checkers.Game, depth int) []moveEval {
 
 		go func(m checkers.Move) {
 			eval := minMax(futureGame, depth, depth, lowestE, highestE)
-			moveEvalsChannel <- moveEval{move: m, eval: eval}
+			moveEvalsChannel <- moveEval{depth: depth + 1, move: m, eval: eval}
 			// moveEvals = append(moveEvals, moveEval{move: move, eval: eval})
 		}(move)
 	}
@@ -45,18 +45,40 @@ func calculateAllMoves(g *checkers.Game, depth int) []moveEval {
 }
 
 func SmartAi(g checkers.Game) checkers.Move {
-	moveEvals := calculateAllMoves(&g, 8)
-	sortMoveEvalsHighToLow(moveEvals)
-
 	var bestMoveEval moveEval
 
-	if g.PlrTurn == checkers.BluePlayer {
-		// take first move
-		bestMoveEval = moveEvals[0]
-	} else {
-		// red wants lowest so take last
-		bestMoveEval = moveEvals[len(moveEvals)-1]
-	}
+	timeLimitCh := time.After(time.Millisecond * 200)
+	stop := make(chan bool, 1) // TODO: somehow use the other channel twice
+	defer func() {
+		stop <- true
+	}()
+
+	go func() {
+		var moveEvals []moveEval
+		moves := g.GetLegalMoves()
+
+		for depth := 1; true; depth++ { // keep searching deeper until told to stop
+			select {
+			case <-stop:
+				return
+
+			default:
+				moveEvals = calculateAllMoves(&g, depth, moves)
+
+				if g.PlrTurn == checkers.BluePlayer {
+					sortMoveEvalsHighToLow(moveEvals)
+				} else {
+					sortMoveEvalsLowToHigh(moveEvals)
+				}
+
+				bestMoveEval = moveEvals[0]
+
+				moves = getMovesFromMoveEvals(moveEvals) // does this do what I think it does?
+			}
+		}
+	}()
+
+	<-timeLimitCh
 
 	fmt.Println(bestMoveEval)
 

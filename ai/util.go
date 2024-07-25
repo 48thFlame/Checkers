@@ -16,6 +16,22 @@ func sortMoveEvalsHighToLow(s []moveEval) {
 	})
 }
 
+func sortMoveEvalsLowToHigh(s []moveEval) {
+	sort.Slice(s, func(i, j int) bool {
+		return s[i].eval < s[j].eval
+	})
+}
+
+func getMovesFromMoveEvals(moveEvals []moveEval) []checkers.Move {
+	moves := make([]checkers.Move, 0, len(moveEvals))
+
+	for _, me := range moveEvals {
+		moves = append(moves, me.move)
+	}
+
+	return moves
+}
+
 func iAbs(a int) int {
 	if a < 0 {
 		return -a
