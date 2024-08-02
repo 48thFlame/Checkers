@@ -2,35 +2,12 @@ package ai
 
 import (
 	"fmt"
-	"sort"
 	"strconv"
 	"strings"
 
 	"github.com/48thFlame/Checkers/checkers"
 	"github.com/fatih/color"
 )
-
-func sortMoveEvalsHighToLow(s []moveEval) {
-	sort.Slice(s, func(i, j int) bool {
-		return s[i].eval > s[j].eval
-	})
-}
-
-func sortMoveEvalsLowToHigh(s []moveEval) {
-	sort.Slice(s, func(i, j int) bool {
-		return s[i].eval < s[j].eval
-	})
-}
-
-func getMovesFromMoveEvals(moveEvals []moveEval) []checkers.Move {
-	moves := make([]checkers.Move, 0, len(moveEvals))
-
-	for _, me := range moveEvals {
-		moves = append(moves, me.move)
-	}
-
-	return moves
-}
 
 func iAbs(a int) int {
 	if a < 0 {
@@ -51,6 +28,50 @@ func getManhattanDist(a, b int) int {
 	deltaRow := iAbs(aRow - bRow)
 
 	return deltaCol + deltaRow
+}
+
+func removeFromSlice[T interface{}](s []T, i int) []T {
+	s[i] = s[len(s)-1]
+	return s[:len(s)-1]
+}
+
+func prependMoveToSlice(x []checkers.Move, y checkers.Move) []checkers.Move {
+	x = append(x, checkers.Move{})
+	copy(x[1:], x)
+	x[0] = y
+	return x
+}
+
+func sameMove(a, b checkers.Move) bool {
+	if a.StartI != b.StartI || a.EndI != b.EndI {
+		return false
+	}
+
+	if len(a.CapturedPiecesI) != len(b.CapturedPiecesI) {
+		return false
+	}
+
+	for i, v := range a.CapturedPiecesI {
+		if v != b.CapturedPiecesI[i] {
+			return false
+		}
+	}
+
+	return true
+}
+
+func getOrderedLegalMoves(g *checkers.Game, bestMove checkers.Move) []checkers.Move {
+	legalMoves := g.GetLegalMoves()
+	for moveI, move := range legalMoves {
+		if sameMove(move, bestMove) {
+			removeFromSlice(legalMoves, moveI)
+			break
+		}
+	}
+
+	prependMoveToSlice(legalMoves, bestMove)
+
+	return legalMoves
 }
 
 func boardSlotToString(s checkers.BoardSlot, coord int, value bool) (str string) {
@@ -151,6 +172,7 @@ type minMaxStats struct {
 	extendedSearch int
 	midEval        int
 	endEval        int
+	gameEval       int
 }
 
 func (mms minMaxStats) String() string {
@@ -160,6 +182,7 @@ func (mms minMaxStats) String() string {
 	s.WriteString(fmt.Sprintf("extendedSearch: %v\n", formatInt(mms.extendedSearch)))
 	s.WriteString(fmt.Sprintf("midEval: %v\n", formatInt(mms.midEval)))
 	s.WriteString(fmt.Sprintf("endEval: %v\n", formatInt(mms.endEval)))
+	s.WriteString(fmt.Sprintf("gameEval: %v\n", formatInt(mms.gameEval)))
 
 	return s.String()
 }
