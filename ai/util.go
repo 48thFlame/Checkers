@@ -2,6 +2,7 @@ package ai
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -30,48 +31,12 @@ func getManhattanDist(a, b int) int {
 	return deltaCol + deltaRow
 }
 
-func removeFromSlice[T interface{}](s []T, i int) []T {
-	s[i] = s[len(s)-1]
-	return s[:len(s)-1]
-}
-
-func prependMoveToSlice(x []checkers.Move, y checkers.Move) []checkers.Move {
-	x = append(x, checkers.Move{})
-	copy(x[1:], x)
-	x[0] = y
-	return x
-}
-
 func sameMove(a, b checkers.Move) bool {
 	if a.StartI != b.StartI || a.EndI != b.EndI {
 		return false
 	}
 
-	if len(a.CapturedPiecesI) != len(b.CapturedPiecesI) {
-		return false
-	}
-
-	for i, v := range a.CapturedPiecesI {
-		if v != b.CapturedPiecesI[i] {
-			return false
-		}
-	}
-
-	return true
-}
-
-func getOrderedLegalMoves(g *checkers.Game, bestMove checkers.Move) []checkers.Move {
-	legalMoves := g.GetLegalMoves()
-	for moveI, move := range legalMoves {
-		if sameMove(move, bestMove) {
-			removeFromSlice(legalMoves, moveI)
-			break
-		}
-	}
-
-	prependMoveToSlice(legalMoves, bestMove)
-
-	return legalMoves
+	return slices.Equal(a.CapturedPiecesI, b.CapturedPiecesI)
 }
 
 func boardSlotToString(s checkers.BoardSlot, coord int, value bool) (str string) {

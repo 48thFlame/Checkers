@@ -2,6 +2,7 @@ package ai
 
 import (
 	"fmt"
+	"slices"
 	"time"
 
 	"github.com/48thFlame/Checkers/checkers"
@@ -21,14 +22,15 @@ func (me moveEval) String() string {
 func SmartAi(g checkers.Game) checkers.Move {
 	var bestMoveEval moveEval
 
-	timeLimitCh := time.After(time.Millisecond * 500)
-	stop := make(chan bool, 1) // TODO: somehow use the other channel twice
+	timeLimitCh := time.After(time.Millisecond * 200)
+	stop := make(chan bool, 1) // somehow use the other channel twice?
 	defer func() {
 		stop <- true
 	}()
 
 	go func() {
 		legalMoves := g.GetLegalMoves()
+		bestMoveEval.move = legalMoves[0]
 
 		for depth := 1; true; depth++ { // keep searching deeper until told to stop
 			select {
@@ -38,7 +40,13 @@ func SmartAi(g checkers.Game) checkers.Move {
 
 			default:
 				bestMoveEval = minMax(g, legalMoves, depth, depth, lowestE, highestE)
-				legalMoves = getOrderedLegalMoves(&g, bestMoveEval.move)
+
+				// after a search re-order `legalMoves` with the new info
+				legalMoves = slices.DeleteFunc(legalMoves, func(m checkers.Move) bool {
+					return sameMove(m, bestMoveEval.move)
+				})
+
+				legalMoves = slices.Insert(legalMoves, 0, bestMoveEval.move)
 			}
 		}
 	}()
