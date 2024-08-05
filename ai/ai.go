@@ -19,10 +19,10 @@ func (me moveEval) String() string {
 		me.depth, me.move.StartI, me.move.EndI, me.eval)
 }
 
-func SmartAi(g checkers.Game) checkers.Move {
+func SmartAi(g checkers.Game, timeLimit time.Duration, printEval bool) checkers.Move {
 	var bestMoveEval moveEval
 
-	timeLimitCh := time.After(time.Millisecond * 200)
+	timeLimitCh := time.After(timeLimit)
 	stop := make(chan bool, 1) // somehow use the other channel twice?
 	defer func() {
 		stop <- true
@@ -31,6 +31,9 @@ func SmartAi(g checkers.Game) checkers.Move {
 	go func() {
 		legalMoves := g.GetLegalMoves()
 		bestMoveEval.move = legalMoves[0]
+		if len(legalMoves) == 1 {
+			return
+		}
 
 		for depth := 1; true; depth++ { // keep searching deeper until told to stop
 			select {
@@ -53,7 +56,9 @@ func SmartAi(g checkers.Game) checkers.Move {
 
 	<-timeLimitCh
 
-	fmt.Println(bestMoveEval)
+	if printEval {
+		fmt.Println(bestMoveEval)
+	}
 
 	return bestMoveEval.move
 }

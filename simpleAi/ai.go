@@ -2,6 +2,9 @@ package simpleAi
 
 import (
 	"fmt"
+	"time"
+
+	"math/rand"
 
 	"github.com/48thFlame/Checkers/checkers"
 )
@@ -45,7 +48,7 @@ func calculateAllMoves(g *checkers.Game, depth uint) []moveEval {
 	return moveEvals
 }
 
-func SimpleAi(g checkers.Game) checkers.Move {
+func SimpleAi(g checkers.Game, _timeLimit time.Duration, printEval bool) checkers.Move {
 	moveEvals := calculateAllMoves(&g, 8)
 	sortMoveEvalsHighToLow(moveEvals)
 
@@ -59,7 +62,16 @@ func SimpleAi(g checkers.Game) checkers.Move {
 		bestMoveEval = moveEvals[len(moveEvals)-1]
 	}
 
-	fmt.Println(bestMoveEval)
+	if printEval {
+		fmt.Println(bestMoveEval)
+	}
 
 	return bestMoveEval.move
+}
+
+func RandomAi(g checkers.Game, _timeLimit time.Duration, _printEval bool) checkers.Move {
+	moves := g.GetLegalMoves()
+	randomMove := moves[rand.Intn(len(moves))]
+
+	return randomMove
 }
