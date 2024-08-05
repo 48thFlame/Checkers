@@ -61,73 +61,6 @@ func NewBoard() Board {
 		NaS, RedPiece, NaS, RedPiece, NaS, RedPiece, NaS, RedPiece,
 		RedPiece, NaS, RedPiece, NaS, RedPiece, NaS, RedPiece, NaS,
 	}
-	// return Board{
-	// 	// one king
-	// 	NaS, Empty, NaS, Empty, NaS, Empty, NaS, Empty,
-	// 	Empty, NaS, Empty, NaS, Empty, NaS, Empty, NaS,
-	// 	NaS, Empty, NaS, Empty, NaS, Empty, NaS, Empty,
-	// 	Empty, NaS, Empty, NaS, Empty, NaS, Empty, NaS,
-	// 	NaS, Empty, NaS, BlueKing, NaS, Empty, NaS, Empty,
-	// 	Empty, NaS, Empty, NaS, Empty, NaS, Empty, NaS,
-	// 	NaS, Empty, NaS, Empty, NaS, Empty, NaS, Empty,
-	// 	Empty, NaS, Empty, NaS, Empty, NaS, Empty, NaS,
-	// }
-	// return Board{
-	// 	// 2 v 1
-	// 	NaS, Empty, NaS, Empty, NaS, Empty, NaS, Empty,
-	// 	Empty, NaS, Empty, NaS, Empty, NaS, Empty, NaS,
-	// 	NaS, Empty, NaS, Empty, NaS, Empty, NaS, Empty,
-	// 	Empty, NaS, Empty, NaS, Empty, NaS, Empty, NaS,
-	// 	NaS, Empty, NaS, Empty, NaS, BlueKing, NaS, BlueKing,
-	// 	Empty, NaS, Empty, NaS, Empty, NaS, Empty, NaS,
-	// 	NaS, Empty, NaS, Empty, NaS, Empty, NaS, Empty,
-	// 	Empty, NaS, Empty, NaS, Empty, NaS, RedKing, NaS,
-	// }
-
-	// return Board{
-	// 	// end game
-	// 	NaS, Empty, NaS, BlueKing, NaS, Empty, NaS, BlueKing,
-	// 	Empty, NaS, Empty, NaS, BlueKing, NaS, Empty, NaS,
-	// 	NaS, Empty, NaS, Empty, NaS, Empty, NaS, Empty,
-	// 	Empty, NaS, Empty, NaS, Empty, NaS, Empty, NaS,
-	// 	NaS, Empty, NaS, RedKing, NaS, Empty, NaS, Empty,
-	// 	Empty, NaS, Empty, NaS, Empty, NaS, Empty, NaS,
-	// 	NaS, Empty, NaS, RedKing, NaS, Empty, NaS, Empty,
-	// 	Empty, NaS, Empty, NaS, Empty, NaS, Empty, NaS,
-	// }
-	// return Board{
-	// 	// complex position
-	// 	NaS, Empty, NaS, Empty, NaS, Empty, NaS, BluePiece,
-	// 	BluePiece, NaS, Empty, NaS, Empty, NaS, BluePiece, NaS,
-	// 	NaS, BluePiece, NaS, Empty, NaS, Empty, NaS, BluePiece,
-	// 	BluePiece, NaS, Empty, NaS, Empty, NaS, Empty, NaS,
-	// 	NaS, Empty, NaS, Empty, NaS, RedPiece, NaS, Empty,
-	// 	Empty, NaS, Empty, NaS, Empty, NaS, Empty, NaS,
-	// 	NaS, Empty, NaS, RedPiece, NaS, RedPiece, NaS, Empty,
-	// 	RedPiece, NaS, RedPiece, NaS, Empty, NaS, RedPiece, NaS,
-	// }
-	// return Board{
-	// 	// capture testing board
-	// 	NaS, RedKing, NaS, BluePiece, NaS, RedKing, NaS, Empty,
-	// 	Empty, NaS, Empty, NaS, Empty, NaS, BlueKing, NaS,
-	// 	NaS, Empty, NaS, Empty, NaS, RedPiece, NaS, Empty,
-	// 	Empty, NaS, Empty, NaS, Empty, NaS, Empty, NaS,
-	// 	NaS, Empty, NaS, RedKing, NaS, Empty, NaS, Empty,
-	// 	Empty, NaS, Empty, NaS, Empty, NaS, Empty, NaS,
-	// 	NaS, RedPiece, NaS, Empty, NaS, Empty, NaS, Empty,
-	// 	RedPiece, NaS, Empty, NaS, Empty, NaS, Empty, NaS,
-	// }
-	// return Board{
-	// 	// thing
-	// 	NaS, Empty, NaS, BluePiece, NaS, BluePiece, NaS, Empty,
-	// 	Empty, NaS, Empty, NaS, Empty, NaS, Empty, NaS,
-	// 	NaS, Empty, NaS, Empty, NaS, Empty, NaS, Empty,
-	// 	Empty, NaS, Empty, NaS, Empty, NaS, Empty, NaS,
-	// 	NaS, Empty, NaS, Empty, NaS, Empty, NaS, Empty,
-	// 	Empty, NaS, Empty, NaS, Empty, NaS, Empty, NaS,
-	// 	NaS, Empty, Empty, Empty, NaS, Empty, NaS, Empty,
-	// 	RedPiece, RedKing, Empty, NaS, RedPiece, NaS, Empty, NaS,
-	// }
 }
 
 func NewGame() *Game {
@@ -201,9 +134,7 @@ func (g *Game) getGameState() GameState {
 		}
 	}
 
-	// if g.TimeSinceExcitingMove >= 80 { // 40 turns
-	// if g.TimeSinceExcitingMove >= 40 { // 20 turns - for testing
-	if g.TimeSinceExcitingMove >= 24 { // 12 turns - for testing
+	if g.TimeSinceExcitingMove >= 80 { // 40 turns
 		return Draw
 	}
 
