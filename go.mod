@@ -2,10 +2,7 @@ module github.com/48thFlame/Checkers
 
 go 1.22
 
-require (
-	github.com/fatih/color v1.17.0
-	github.com/ytaragin/checkers v0.1.5
-)
+require github.com/fatih/color v1.17.0
 
 require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
