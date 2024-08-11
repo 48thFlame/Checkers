@@ -8,17 +8,6 @@ import (
 	"github.com/48thFlame/Checkers/checkers"
 )
 
-type moveEval struct {
-	depth int
-	move  checkers.Move
-	eval  int
-}
-
-func (me moveEval) String() string {
-	return fmt.Sprintf("(%d| %d,%d |%d)",
-		me.depth, me.move.StartI, me.move.EndI, me.eval)
-}
-
 func SmartAi(g checkers.Game, timeLimit time.Duration, printEval bool) checkers.Move {
 	var bestMoveEval moveEval
 
@@ -31,9 +20,7 @@ func SmartAi(g checkers.Game, timeLimit time.Duration, printEval bool) checkers.
 	go func() {
 		legalMoves := g.GetLegalMoves()
 		bestMoveEval.move = legalMoves[0]
-		if len(legalMoves) == 1 {
-			return
-		}
+		agd := newAiGameData(g)
 
 		for depth := 1; true; depth++ { // keep searching deeper until told to stop
 			select {
@@ -42,9 +29,11 @@ func SmartAi(g checkers.Game, timeLimit time.Duration, printEval bool) checkers.
 				return
 
 			default:
-				bestMoveEval = minMax(g, legalMoves, depth, depth, lowestE, highestE)
+				bestMoveEval = minMax(agd, legalMoves, depth, depth, lowestE, highestE)
 
 				// after a search re-order `legalMoves` with the new info
+				// first delete best move, then insert it at the beginning
+
 				legalMoves = slices.DeleteFunc(legalMoves, func(m checkers.Move) bool {
 					return sameMove(m, bestMoveEval.move)
 				})

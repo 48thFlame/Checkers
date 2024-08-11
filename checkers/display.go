@@ -57,7 +57,7 @@ func (s BoardSlot) String(coord int) (str string) {
 func (g Game) String() string {
 	s := strings.Builder{}
 
-	s.WriteString(string(g.State))
+	s.WriteString(fmt.Sprintf("%v, turn: %v", g.State, g.TurnNumber))
 	s.WriteRune('\n')
 
 	for rowI := 0; rowI < BoardSideSize; rowI++ {

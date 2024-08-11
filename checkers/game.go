@@ -10,10 +10,10 @@ const (
 type GameState string
 
 const (
-	Playing GameState = "Playing..."
-	BlueWon GameState = "Yay Blue!"
-	RedWon  GameState = "Red!!!!"
-	Draw    GameState = "Its a draw."
+	Playing GameState = "Playing"
+	BlueWon GameState = "Blue Won"
+	RedWon  GameState = "Red Won"
+	Draw    GameState = "Draw"
 )
 
 type BoardSlot uint8
@@ -33,7 +33,7 @@ var (
 )
 
 const (
-	BoardSideSize = 8
+	BoardSideSize = 8 // TODO: actually make it so can play different size boards?
 	BoardSize     = BoardSideSize * BoardSideSize
 )
 
@@ -65,26 +65,28 @@ func NewBoard() Board {
 
 func NewGame() *Game {
 	return &Game{
-		State:           Playing,
-		PlrTurn:         BluePlayer,
-		Board:           NewBoard(),
-		NPiecesCaptured: 0,
+		State:      Playing,
+		PlrTurn:    BluePlayer,
+		Board:      NewBoard(),
+		TurnNumber: 1,
 
 		TimeSinceExcitingMove: 0,
 	}
 }
 
 type Game struct {
-	State           GameState
-	PlrTurn         Player // who's the current player's turn
-	Board           Board
-	NPiecesCaptured int
+	State      GameState
+	PlrTurn    Player // who's the current player's turn
+	Board      Board
+	TurnNumber int // number of half turns that finished
 
 	// this is to check draw condition
 	TimeSinceExcitingMove int // time since capture/non-king move
 }
 
 func (g *Game) PlayMove(m Move) {
+	g.TurnNumber++
+
 	switch g.PlrTurn {
 	case BluePlayer:
 		if isOnEnd(BluePlayer, m.EndI) { // If just moved to an end - "King Me!"
@@ -116,7 +118,6 @@ func (g *Game) PlayMove(m Move) {
 
 	for _, i := range m.CapturedPiecesI {
 		g.Board[i] = Empty
-		g.NPiecesCaptured++
 	}
 
 	g.State = g.getGameState()

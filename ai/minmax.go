@@ -4,36 +4,32 @@ import (
 	"github.com/48thFlame/Checkers/checkers"
 )
 
-const (
-	piecesCapturedForEndGame = 24 - 8
-)
-
 // classic min-max with alpha beta pruning
-func minMax(g checkers.Game, startingLegalMoves []checkers.Move, startDepth, currentDepth int, alpha, beta int) (me moveEval) {
+func minMax(agd aiGameData, startingLegalMoves []checkers.Move, startDepth, currentDepth int, alpha, beta int) (me moveEval) {
 	MinMaxStatsMan.calls++
 
-	if g.State != checkers.Playing {
+	if agd.g.State != checkers.Playing {
 		MinMaxStatsMan.gameEval++
-		me.eval = gameOverEval(g, startDepth, currentDepth)
+		me.eval = gameOverEval(agd, startDepth, currentDepth)
 		return me
 	}
 
 	if currentDepth == 0 {
-		if g.CanCapture() {
+		if agd.canCapture() {
 			// should not end calculation here - in middle of capture sequence
 			// extend search for 1 more move
 			MinMaxStatsMan.extendedSearch++
-			return minMax(g, startingLegalMoves, startDepth+1, 1, alpha, beta)
+			return minMax(agd, startingLegalMoves, startDepth+1, 1, alpha, beta)
 		}
+		// if not in middle of capture sequence regular eval
 
-		// if not in middle of capture sequence eval
-		if g.NPiecesCaptured >= piecesCapturedForEndGame {
+		if agd.isInEndGame() {
 			MinMaxStatsMan.endEval++
-			me.eval = EvaluateEndGamePos(g)
+			me.eval = EvaluateEndGamePos(agd)
 			return me
 		} else {
 			MinMaxStatsMan.midEval++
-			me.eval = EvaluateMidPosition(g)
+			me.eval = EvaluateMidPosition(agd)
 			return me
 		}
 	}
@@ -42,15 +38,15 @@ func minMax(g checkers.Game, startingLegalMoves []checkers.Move, startDepth, cur
 	if startDepth == currentDepth { // in starting position - use those moves there optimized with best move first
 		legalMoves = startingLegalMoves
 	} else {
-		legalMoves = g.GetLegalMoves()
+		legalMoves = agd.g.GetLegalMoves()
 	}
 
-	if g.PlrTurn == checkers.BluePlayer {
+	if agd.g.PlrTurn == checkers.BluePlayer {
 		me.eval = lowestE
 
 		for _, move := range legalMoves {
-			futureGame := g
-			(&futureGame).PlayMove(move)
+			futureGame := agd
+			(&futureGame).playMove(move)
 			currentMoveEval := minMax(futureGame, startingLegalMoves, startDepth, currentDepth-1, alpha, beta)
 
 			if currentMoveEval.eval > me.eval { // if current move is better then previously checked
@@ -73,8 +69,8 @@ func minMax(g checkers.Game, startingLegalMoves []checkers.Move, startDepth, cur
 		me.eval = highestE
 
 		for _, move := range legalMoves {
-			futureGame := g
-			(&futureGame).PlayMove(move)
+			futureGame := agd
+			(&futureGame).playMove(move)
 			currentMoveEval := minMax(futureGame, startingLegalMoves, startDepth, currentDepth-1, alpha, beta)
 
 			if currentMoveEval.eval < me.eval {

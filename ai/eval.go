@@ -1,8 +1,21 @@
 package ai
 
 import (
+	"fmt"
+
 	"github.com/48thFlame/Checkers/checkers"
 )
+
+type moveEval struct {
+	depth int
+	move  checkers.Move
+	eval  int
+}
+
+func (me moveEval) String() string {
+	return fmt.Sprintf("(%d| %d,%d |%d)",
+		me.depth, me.move.StartI, me.move.EndI, me.eval)
+}
 
 const (
 	highestE = 199_999_999
@@ -15,8 +28,8 @@ const (
 	drawE    = 0
 )
 
-func gameOverEval(g checkers.Game, startDepth, currentDepth int) int {
-	switch g.State {
+func gameOverEval(agd aiGameData, startDepth, currentDepth int) int {
+	switch agd.g.State {
 	case checkers.Draw:
 		return drawE
 	case checkers.BlueWon:
@@ -60,8 +73,8 @@ var (
 	}
 )
 
-func EvaluateMidPosition(g checkers.Game) (eval int) {
-	for slotI, slot := range g.Board {
+func EvaluateMidPosition(agd aiGameData) (eval int) {
+	for slotI, slot := range agd.g.Board {
 		switch slot {
 		case checkers.BluePiece:
 			eval += PiecesHeatMap[slotI]
@@ -102,35 +115,25 @@ var (
 	}
 )
 
-func EvaluateEndGamePos(g checkers.Game) (eval int) {
-	var nBlue, nRed uint
-
+func EvaluateEndGamePos(agd aiGameData) (eval int) {
 	blueKingIs := make([]int, 0)
 	redKingIs := make([]int, 0)
 
-	for slotI, slot := range g.Board {
+	for slotI, slot := range agd.g.Board {
 		switch slot {
 		case checkers.BluePiece:
-			nBlue++
-
 			eval += endPieceWeightE
 
 		case checkers.RedPiece:
-			nRed++
-
 			eval -= endPieceWeightE
 
 		case checkers.BlueKing:
-			nBlue++
-
 			eval += endKingWeightE
 			eval += EndKingHeatMap[slotI]
 
 			blueKingIs = append(blueKingIs, slotI)
 
 		case checkers.RedKing:
-			nRed++
-
 			eval -= endKingWeightE
 			eval -= EndKingHeatMap[checkers.BoardSize-1-slotI]
 
@@ -138,7 +141,7 @@ func EvaluateEndGamePos(g checkers.Game) (eval int) {
 		}
 	}
 
-	if nBlue != nRed {
+	if agd.nBlue != agd.nRed {
 		var dist, distScore int
 
 		for _, bki := range blueKingIs {
@@ -151,7 +154,7 @@ func EvaluateEndGamePos(g checkers.Game) (eval int) {
 			}
 		}
 
-		if nBlue > nRed {
+		if agd.nBlue > agd.nRed {
 			eval += distScore
 		} else { // => nBlue < nRed
 			eval -= distScore
