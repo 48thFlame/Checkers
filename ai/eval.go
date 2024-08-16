@@ -57,7 +57,7 @@ var (
 		9, -0, 10, -0, 10, -0, 10, -0,
 		-0, 4, -0, 5, -0, 5, -0, 11,
 		3, -0, 0, -0, 0, -0, 0, -0,
-		-0, 25, -0, 30, -0, 30, -0, 20, // hoping doesn't end calculation when can be captured
+		-0, 16, -0, 18, -0, 18, -0, 15, // hoping doesn't end calculation when can be captured
 		0, -0, 0, -0, 0, -0, 0, -0,
 	}
 
