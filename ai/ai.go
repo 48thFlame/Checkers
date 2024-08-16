@@ -21,9 +21,6 @@ func SmartAi(g checkers.Game, timeLimit time.Duration, printEval bool) checkers.
 
 	timeLimitCh := time.After(timeLimit)
 	stop := make(chan bool, 1) // somehow use the other channel twice?
-	defer func() {
-		stop <- true
-	}()
 
 	go func() {
 		legalMoves := g.GetLegalMoves()
@@ -33,7 +30,7 @@ func SmartAi(g checkers.Game, timeLimit time.Duration, printEval bool) checkers.
 		for depth := 1; true; depth++ { // keep searching deeper until told to stop
 			select {
 			case <-stop:
-				// told to stop
+				// told to stop (timeout)
 				return
 
 			default:
@@ -41,6 +38,8 @@ func SmartAi(g checkers.Game, timeLimit time.Duration, printEval bool) checkers.
 
 				// after a search re-order `legalMoves` with the new info
 				// first delete best move, then insert it at the beginning
+				// not sure if this actually does something (I don't think it does)
+				// but it's just too depressing to remove this
 
 				legalMoves = slices.DeleteFunc(legalMoves, func(m checkers.Move) bool {
 					return sameMove(m, bestMoveEval.move)
@@ -52,6 +51,7 @@ func SmartAi(g checkers.Game, timeLimit time.Duration, printEval bool) checkers.
 	}()
 
 	<-timeLimitCh
+	stop <- true
 
 	if printEval {
 		fmt.Println(bestMoveEval)

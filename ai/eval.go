@@ -100,18 +100,19 @@ func evaluateMidPosition(agd aiGameData) (eval int) {
 const (
 	endPieceWeightE = 70
 	endKingWeightE  = 150
+	endPiecePunishE = 5
 )
 
 var (
 	endKingHeatMap = heatMap{
-		-0, 9, -0, -10, -0, -11, -0, -12,
-		9, -0, 1, -0, 0, -0, -2, -0,
+		-0, 3, -0, -10, -0, -11, -0, -12,
+		3, -0, 1, -0, 0, -0, -2, -0,
 		-0, 1, -0, 2, -0, 2, -0, -10,
 		-10, -0, 2, -0, 2, -0, 0, -0,
 		-0, 0, -0, 2, -0, 2, -0, -10,
 		-11, -0, 2, -0, 2, -0, 1, -0,
-		-0, -2, -0, 0, -0, 1, -0, 9,
-		-12, -0, -11, -0, -10, -0, 9, -0,
+		-0, -2, -0, 0, -0, 1, -0, 3,
+		-12, -0, -11, -0, -10, -0, 3, -0,
 	}
 )
 
@@ -177,8 +178,10 @@ func evaluateEndGamePos(agd aiGameData) (eval int) {
 
 		if agd.nBlue > agd.nRed {
 			eval += distScore
+			eval -= agd.nRed * endPiecePunishE // reward trading
 		} else { // nBlue < nRed
 			eval -= distScore
+			eval += agd.nBlue * endPiecePunishE
 		}
 	}
 
