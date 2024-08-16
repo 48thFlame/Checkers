@@ -8,6 +8,14 @@ import (
 	"github.com/48thFlame/Checkers/checkers"
 )
 
+func sameMove(a, b checkers.Move) bool {
+	if a.StartI != b.StartI || a.EndI != b.EndI {
+		return false
+	}
+
+	return slices.Equal(a.CapturedPiecesI, b.CapturedPiecesI)
+}
+
 func SmartAi(g checkers.Game, timeLimit time.Duration, printEval bool) checkers.Move {
 	var bestMoveEval moveEval
 

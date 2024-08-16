@@ -50,7 +50,7 @@ const (
 type heatMap [checkers.BoardSize]int
 
 var (
-	PiecesHeatMap = heatMap{
+	piecesHeatMap = heatMap{
 		-0, 8, -0, 8, -0, 8, -0, 6,
 		2, -0, 2, -0, 2, -0, 1, -0,
 		-0, 6, -0, 6, -0, 6, -0, 6,
@@ -61,7 +61,7 @@ var (
 		0, -0, 0, -0, 0, -0, 0, -0,
 	}
 
-	KingHeatMap = heatMap{
+	kingHeatMap = heatMap{
 		-0, -4, -0, -5, -0, -5, -0, -5,
 		-4, -0, 2, -0, 2, -0, -1, -0,
 		-0, 3, -0, 5, -0, 5, -0, -3,
@@ -73,24 +73,24 @@ var (
 	}
 )
 
-func EvaluateMidPosition(agd aiGameData) (eval int) {
+func evaluateMidPosition(agd aiGameData) (eval int) {
 	for slotI, slot := range agd.g.Board {
 		switch slot {
 		case checkers.BluePiece:
-			eval += PiecesHeatMap[slotI]
+			eval += piecesHeatMap[slotI]
 			eval += pieceWeightE
 
 		case checkers.BlueKing:
 			eval += kingWeightE
-			eval += KingHeatMap[slotI]
+			eval += kingHeatMap[slotI]
 
 		case checkers.RedPiece:
 			eval -= pieceWeightE
-			eval -= PiecesHeatMap[checkers.BoardSize-1-slotI]
+			eval -= piecesHeatMap[checkers.BoardSize-1-slotI]
 
 		case checkers.RedKing:
 			eval -= kingWeightE
-			eval -= KingHeatMap[checkers.BoardSize-1-slotI]
+			eval -= kingHeatMap[checkers.BoardSize-1-slotI]
 		}
 	}
 
@@ -103,7 +103,7 @@ const (
 )
 
 var (
-	EndKingHeatMap = heatMap{
+	endKingHeatMap = heatMap{
 		-0, 9, -0, -10, -0, -11, -0, -12,
 		9, -0, 1, -0, 0, -0, -2, -0,
 		-0, 1, -0, 2, -0, 2, -0, -10,
@@ -115,7 +115,28 @@ var (
 	}
 )
 
-func EvaluateEndGamePos(agd aiGameData) (eval int) {
+func iAbs(a int) int {
+	if a < 0 {
+		return -a
+	} else {
+		return a
+	}
+}
+
+func getManhattanDist(a, b int) int {
+	aCol := a % checkers.BoardSideSize
+	aRow := a / checkers.BoardSideSize
+
+	bCol := b % checkers.BoardSideSize
+	bRow := b / checkers.BoardSideSize
+
+	deltaCol := iAbs(aCol - bCol)
+	deltaRow := iAbs(aRow - bRow)
+
+	return deltaCol + deltaRow
+}
+
+func evaluateEndGamePos(agd aiGameData) (eval int) {
 	blueKingIs := make([]int, 0)
 	redKingIs := make([]int, 0)
 
@@ -129,13 +150,13 @@ func EvaluateEndGamePos(agd aiGameData) (eval int) {
 
 		case checkers.BlueKing:
 			eval += endKingWeightE
-			eval += EndKingHeatMap[slotI]
+			eval += endKingHeatMap[slotI]
 
 			blueKingIs = append(blueKingIs, slotI)
 
 		case checkers.RedKing:
 			eval -= endKingWeightE
-			eval -= EndKingHeatMap[checkers.BoardSize-1-slotI]
+			eval -= endKingHeatMap[checkers.BoardSize-1-slotI]
 
 			redKingIs = append(redKingIs, slotI)
 		}
@@ -156,7 +177,7 @@ func EvaluateEndGamePos(agd aiGameData) (eval int) {
 
 		if agd.nBlue > agd.nRed {
 			eval += distScore
-		} else { // => nBlue < nRed
+		} else { // nBlue < nRed
 			eval -= distScore
 		}
 	}
