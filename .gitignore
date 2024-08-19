@@ -1,3 +1,7 @@
 .vscode
 
 archive
+
+elm-stuff
+elm.js
+elm-watch.json
