@@ -7,16 +7,45 @@ import (
 	"github.com/48thFlame/Checkers/checkers"
 )
 
-type moveInputFunc func(g checkers.Game, timeLimit time.Duration, printEval bool) checkers.Move
+type gamePlayerFunc func(g checkers.Game) checkers.Move
 
-func PlayGame(plr1blue, plr2red moveInputFunc, timeLimit time.Duration) {
+type timedMoveInputFunc func(g checkers.Game, timeLimit time.Duration) (checkers.Move, string)
+
+func PlaySimpleGame(plr1blue, plr2red gamePlayerFunc) {
 	g := checkers.NewGame()
 	fmt.Print(g)
 
 	for g.State == checkers.Playing {
 		var move checkers.Move
 
-		var plrToGo moveInputFunc
+		var plrToGo gamePlayerFunc
+		var plrToGoName string
+
+		switch g.PlrTurn {
+		case checkers.BluePlayer:
+			plrToGo = plr1blue
+			plrToGoName = "Blue"
+		case checkers.RedPlayer:
+			plrToGo = plr2red
+			plrToGoName = "Red"
+		}
+
+		move = plrToGo(*g)
+
+		fmt.Printf("%s went: %v\n", plrToGoName, move)
+		g.PlayMove(move)
+		fmt.Print(g)
+	}
+}
+
+func PlayTimedGame(plr1blue, plr2red timedMoveInputFunc, timeLimit time.Duration) {
+	g := checkers.NewGame()
+	fmt.Print(g)
+
+	for g.State == checkers.Playing {
+		var move checkers.Move
+
+		var plrToGo timedMoveInputFunc
 		var plrToGoName string
 
 		switch g.PlrTurn {
@@ -30,9 +59,11 @@ func PlayGame(plr1blue, plr2red moveInputFunc, timeLimit time.Duration) {
 
 		start := time.Now()
 
-		move = plrToGo(*g, timeLimit, true)
-
+		move, eval := plrToGo(*g, timeLimit)
 		elapsed := time.Since(start)
+
+		fmt.Println(eval)
+
 		fmt.Printf("%s took %s\n", plrToGoName, elapsed)
 
 		if elapsed > (timeLimit + 10*time.Millisecond) {
@@ -57,13 +88,13 @@ func PlayGame(plr1blue, plr2red moveInputFunc, timeLimit time.Duration) {
 	}
 }
 
-func SimulateGame(plr1blue, plr2red moveInputFunc, timeLimit time.Duration) checkers.Game {
+func SimulateTimedGame(plr1blue, plr2red timedMoveInputFunc, timeLimit time.Duration) checkers.Game {
 	g := checkers.NewGame()
 
 	for g.State == checkers.Playing {
 		var move checkers.Move
 
-		var plrToGo moveInputFunc
+		var plrToGo timedMoveInputFunc
 
 		switch g.PlrTurn {
 		case checkers.BluePlayer:
@@ -74,7 +105,7 @@ func SimulateGame(plr1blue, plr2red moveInputFunc, timeLimit time.Duration) chec
 
 		start := time.Now()
 
-		move = plrToGo(*g, timeLimit, false)
+		move, _ = plrToGo(*g, timeLimit)
 
 		elapsed := time.Since(start)
 
@@ -108,44 +139,13 @@ func (tr TournamentResults) String() string {
 		tr.BlueWins, tr.RedWins, tr.Draws)
 }
 
-// simulate = concurrent
-func SimulateTournament(plr1blue, plr2red moveInputFunc, timeLimit time.Duration, nOfGames int) {
-	gameChan := make(chan checkers.Game)
-
-	for i := 1; i <= nOfGames; i++ {
-		fmt.Println("Started game", i)
-		go func() {
-			gameChan <- SimulateGame(plr1blue, plr2red, timeLimit)
-		}()
-	}
-
-	tr := TournamentResults{}
-
-	for j := 0; j < nOfGames; j++ {
-		g := <-gameChan
-
-		switch g.State {
-		case checkers.BlueWon:
-			tr.BlueWins++
-		case checkers.RedWon:
-			tr.RedWins++
-		case checkers.Draw:
-			tr.Draws++
-		}
-
-		fmt.Print(g) // print final position
-	}
-
-	fmt.Print(tr)
-}
-
 // play = not concurrent
-func PlayTournament(plr1blue, plr2red moveInputFunc, timeLimit time.Duration, nOfGames int) {
+func PlayTimedTournament(plr1blue, plr2red timedMoveInputFunc, timeLimit time.Duration, nOfGames int) {
 	tr := TournamentResults{}
 
 	for i := 1; i <= nOfGames; i++ {
 		fmt.Println("Playing game", i)
-		g := SimulateGame(plr1blue, plr2red, timeLimit)
+		g := SimulateTimedGame(plr1blue, plr2red, timeLimit)
 		fmt.Print(g) // print final position
 
 		switch g.State {

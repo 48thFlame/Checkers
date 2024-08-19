@@ -1,8 +1,9 @@
 package ai
 
 import (
-	"fmt"
+	"math/rand"
 	"slices"
+	"sort"
 	"time"
 
 	"github.com/48thFlame/Checkers/checkers"
@@ -16,7 +17,7 @@ func sameMove(a, b checkers.Move) bool {
 	return slices.Equal(a.CapturedPiecesI, b.CapturedPiecesI)
 }
 
-func SmartAi(g checkers.Game, timeLimit time.Duration, printEval bool) checkers.Move {
+func SmartAiTimeBound(g checkers.Game, timeLimit time.Duration) (move checkers.Move, eval string) {
 	var bestMoveEval moveEval
 
 	timeLimitCh := time.After(timeLimit)
@@ -53,9 +54,113 @@ func SmartAi(g checkers.Game, timeLimit time.Duration, printEval bool) checkers.
 	<-timeLimitCh
 	stop <- true
 
-	if printEval {
-		fmt.Println(bestMoveEval)
+	return bestMoveEval.move, bestMoveEval.String()
+}
+
+func SmartAiDepthLimited(g checkers.Game, depthLimit int) (move checkers.Move, eval string) {
+	var bestMoveEval moveEval
+
+	legalMoves := g.GetLegalMoves()
+	agd := newAiGameData(g)
+	bestMoveEval = minMax(agd, legalMoves, depthLimit, depthLimit, lowestE, highestE)
+
+	return bestMoveEval.move, bestMoveEval.String()
+}
+
+func calculateAllMoves(g checkers.Game, depth int) []moveEval {
+	moveEvalsChannel := make(chan moveEval)
+
+	legalMoves := g.GetLegalMoves()
+
+	for _, move := range legalMoves {
+		futureGame := g
+		(&futureGame).PlayMove(move)
+		futureAGD := newAiGameData(futureGame)
+		futureLegalMoves := futureGame.GetLegalMoves()
+
+		go func(m checkers.Move) {
+			me := minMax(futureAGD, futureLegalMoves, depth, depth-1, lowestE, highestE)
+			moveEvalsChannel <- moveEval{depth: depth, move: m, eval: me.eval}
+		}(move)
 	}
 
-	return bestMoveEval.move
+	moveEvals := make([]moveEval, 0)
+	for i := 0; i < len(legalMoves); i++ {
+		me := <-moveEvalsChannel
+
+		moveEvals = append(moveEvals, me)
+	}
+
+	return moveEvals
+}
+
+func sortMoveEvalsHighToLow(s []moveEval) {
+	sort.Slice(s, func(i, j int) bool {
+		return s[i].eval > s[j].eval
+	})
+}
+
+func sortMoveEvalsLowToHigh(s []moveEval) {
+	sort.Slice(s, func(i, j int) bool {
+		return s[i].eval < s[j].eval
+	})
+}
+
+type aiDifficultySetting struct {
+	depth                                  int
+	worstChance, thirdChance, secondChance float32
+}
+
+func difficultySetAi(g checkers.Game, settings aiDifficultySetting) checkers.Move {
+	moveEvals := calculateAllMoves(g, settings.depth)
+
+	if g.PlrTurn == checkers.BluePlayer {
+		sortMoveEvalsHighToLow(moveEvals)
+	} else {
+		sortMoveEvalsLowToHigh(moveEvals)
+	}
+
+	nMoves := len(moveEvals)
+
+	moveEvalToPlay := moveEvals[0]
+
+	if nMoves > 2 { // at least 3 option - sometimes shouldn't play best move
+		randomNum := rand.Float32()
+
+		if randomNum < settings.worstChance {
+			// play worst move
+			moveEvalToPlay = moveEvals[nMoves-1]
+		} else if randomNum < settings.thirdChance {
+			moveEvalToPlay = moveEvals[2] // 3rd best move
+		} else if randomNum < settings.secondChance {
+			moveEvalToPlay = moveEvals[1] // 2nd move
+		}
+	}
+
+	return moveEvalToPlay.move
+}
+
+func EasyAi(g checkers.Game) checkers.Move {
+	return difficultySetAi(g,
+		aiDifficultySetting{depth: 3, worstChance: 0.15, thirdChance: 0.3, secondChance: 0.55})
+}
+
+func MediumAi(g checkers.Game) checkers.Move {
+	return difficultySetAi(g,
+		aiDifficultySetting{depth: 6, worstChance: 0.08, thirdChance: 0.26, secondChance: 0.47})
+}
+
+func HardAi(g checkers.Game) checkers.Move {
+	return difficultySetAi(g,
+		aiDifficultySetting{depth: 7, worstChance: 0.05, thirdChance: 0.15, secondChance: 0.33})
+}
+
+func ExtraHardAi(g checkers.Game) checkers.Move {
+	return difficultySetAi(g,
+		aiDifficultySetting{depth: 8, worstChance: 0.03, thirdChance: 0.1, secondChance: 0.23})
+}
+
+func ImpossibleAi(g checkers.Game) checkers.Move {
+	m, _ := SmartAiTimeBound(g, 400*time.Millisecond)
+	return m
 }
