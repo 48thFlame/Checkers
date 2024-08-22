@@ -1,7 +1,9 @@
 :root {
     --bg-color: #282828;
-    --dark-slot-color: rgb(100, 100, 100);
-    --light-slot-color: rgb(220, 220, 220);
+    /* --dark-slot-color: #646464;
+    --light-slot-color: rgb(220, 220, 220); */
+    --light-slot-color: #cbe4c7;
+    --dark-slot-color: #2ca13c;
 }
 
 body {
@@ -27,16 +29,40 @@ body {
     aspect-ratio: 1/1;
 }
 
-.cell {
+.slot {
     width: 100%;
     height: 100%;
 
     /* unless its a NaS, it should be dark*/
     background-color: var(--dark-slot-color);
     color: var(--light-slot-color);
-    font-size: large;
 }
 
-.NaS-cell {
+.NaS-slot {
     background-color: var(--light-slot-color);
+}
+
+.piece-slot {
+    display: grid;
+    align-items: center;
+    justify-items: center;
+}
+
+.slot-img {
+    width: 92%;
+    height: 92%;
+
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.slot-i {
+    grid-column: 1;
+    grid-row: 1;
+    z-index: 1;
+
+    /* put in top left of the slot*/
+    align-self: self-start;
+    justify-self: self-start;
+    margin-left: 2px;
 }

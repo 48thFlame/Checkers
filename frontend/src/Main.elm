@@ -2,7 +2,7 @@ module Main exposing (main)
 
 import Browser
 import Html
-import Html.Attributes exposing (class, style)
+import Html.Attributes exposing (alt, class, src, style)
 
 
 main : Program () Model Msg
@@ -18,25 +18,22 @@ main =
 type Slot
     = NaS
     | Empty
-
-
-
--- | BluePiece
--- | BlueKing
--- | RedPiece
--- | RedKing
+    | BluePiece
+    | BlueKing
+    | RedPiece
+    | RedKing
 
 
 newBoard : List Slot
 newBoard =
-    [ [ NaS, Empty, NaS, Empty, NaS, Empty, NaS, Empty ]
-    , [ Empty, NaS, Empty, NaS, Empty, NaS, Empty, NaS ]
-    , [ NaS, Empty, NaS, Empty, NaS, Empty, NaS, Empty ]
-    , [ Empty, NaS, Empty, NaS, Empty, NaS, Empty, NaS ]
-    , [ NaS, Empty, NaS, Empty, NaS, Empty, NaS, Empty ]
-    , [ Empty, NaS, Empty, NaS, Empty, NaS, Empty, NaS ]
-    , [ NaS, Empty, NaS, Empty, NaS, Empty, NaS, Empty ]
-    , [ Empty, NaS, Empty, NaS, Empty, NaS, Empty, NaS ]
+    [ [ NaS, BluePiece, NaS, BluePiece, NaS, BluePiece, NaS, BluePiece ]
+    , [ BluePiece, NaS, BluePiece, NaS, BluePiece, NaS, BluePiece, NaS ]
+    , [ NaS, BluePiece, NaS, BluePiece, NaS, BluePiece, NaS, BluePiece ]
+    , [ Empty, NaS, Empty, NaS, BlueKing, NaS, Empty, NaS ]
+    , [ NaS, Empty, NaS, RedKing, NaS, Empty, NaS, Empty ]
+    , [ RedPiece, NaS, RedPiece, NaS, RedPiece, NaS, RedPiece, NaS ]
+    , [ NaS, RedPiece, NaS, RedPiece, NaS, RedPiece, NaS, RedPiece ]
+    , [ RedPiece, NaS, RedPiece, NaS, RedPiece, NaS, RedPiece, NaS ]
     ]
         |> List.concat
 
@@ -67,39 +64,57 @@ subscriptions _ =
     Sub.none
 
 
-cellToHtml : Int -> Slot -> Html.Html msg
-cellToHtml i cell =
+slotToHtml : Int -> Slot -> Html.Html msg
+slotToHtml i slot =
     let
-        stringedI =
-            String.fromInt i
+        slotISpan =
+            Html.span [ class "slot-i" ]
+                [ Html.text <| String.fromInt i ]
+
+        slotImg pieceName =
+            Html.img
+                [ src ("assets/" ++ pieceName ++ ".webp")
+                , alt pieceName
+                , class "slot-img"
+                ]
+                []
     in
-    case cell of
+    case slot of
         NaS ->
-            Html.div [ class "cell NaS-cell" ] []
+            Html.div [ class "slot NaS-slot" ] []
 
         Empty ->
-            Html.div [ class "cell empty-cell" ] [ Html.text stringedI ]
+            Html.div [ class "slot empty-slot" ]
+                [ slotISpan ]
+
+        BluePiece ->
+            Html.div [ class "slot piece-slot" ]
+                [ slotISpan
+                , slotImg "bluePiece"
+                ]
+
+        BlueKing ->
+            Html.div [ class "slot piece-slot" ]
+                [ slotISpan
+                , slotImg "blueKing"
+                ]
+
+        RedPiece ->
+            Html.div [ class "slot piece-slot" ]
+                [ slotISpan
+                , slotImg "redPiece"
+                ]
+
+        RedKing ->
+            Html.div [ class "slot piece-slot" ]
+                [ slotISpan
+                , slotImg "redKing"
+                ]
 
 
 boardToHtml : List Slot -> Html.Html Msg
 boardToHtml board =
     let
-        stringedSlotRow : Int -> String
-        stringedSlotRow i =
-            (i // 8) + 1 |> String.fromInt
-
-        stringedSlotCol : Int -> String
-        stringedSlotCol i =
-            modBy 8 i + 1 |> String.fromInt
-
-        slotInGridToHtml : Int -> Slot -> Html.Html Msg
-        slotInGridToHtml i cell =
-            Html.div
-                [ style "grid-row-start" (stringedSlotRow i)
-                , style "grid-column-start" (stringedSlotCol i)
-                ]
-                [ cellToHtml i cell ]
-
         stringedBoardSize =
             String.fromInt 8
     in
@@ -108,7 +123,7 @@ boardToHtml board =
         , style "grid-template-rows" ("repeat(" ++ stringedBoardSize ++ ", 1fr)")
         , style "grid-template-columns" ("repeat(" ++ stringedBoardSize ++ ", 1fr)")
         ]
-        (List.indexedMap slotInGridToHtml board)
+        (List.indexedMap slotToHtml board)
 
 
 view : Model -> Html.Html Msg
