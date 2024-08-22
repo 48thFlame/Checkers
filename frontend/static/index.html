@@ -6,14 +6,23 @@
     <title>Checkers</title>
     <link rel="stylesheet" href="style.css">
     <script src="elm.js"></script>
+    <script src="wasm_exec.js"></script>
 </head>
 
 <body>
     <div id="checkers-app"></div>
     <script>
+        // start Elm
         let app = Elm.Main.init({
             node: document.getElementById("checkers-app")
         });      
+    </script>
+    <script>
+        // load the WASM
+        const go = new Go();
+        WebAssembly.instantiateStreaming(fetch("checkers.wasm"), go.importObject).then((result) => {
+            go.run(result.instance);
+        });
     </script>
 </body>
 
