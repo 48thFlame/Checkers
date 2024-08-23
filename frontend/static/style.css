@@ -1,9 +1,7 @@
 :root {
     --bg-color: #282828;
-    /* --dark-slot-color: #646464;
-    --light-slot-color: rgb(220, 220, 220); */
-    --light-slot-color: #cbe4c7;
-    --dark-slot-color: #2ca13c;
+    --light-slot-color: #d8dacf;
+    --dark-slot-color: #6e6e67;
 }
 
 body {
