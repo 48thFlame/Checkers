@@ -5,23 +5,23 @@
     <meta charset="UTF-8">
     <title>Checkers</title>
     <link rel="stylesheet" href="style.css">
-    <script src="elm.js"></script>
     <script src="wasm_exec.js"></script>
+    <script src="elm.js"></script>
 </head>
 
 <body>
     <div id="checkers-app"></div>
-    <script>
-        // start Elm
-        let app = Elm.Main.init({
-            node: document.getElementById("checkers-app")
-        });      
-    </script>
-    <script>
+    <script type="module">
         // load the WASM
         const go = new Go();
-        WebAssembly.instantiateStreaming(fetch("checkers.wasm"), go.importObject).then((result) => {
-            go.run(result.instance);
+        const result = await WebAssembly.instantiateStreaming(
+            fetch("checkers.wasm"), go.importObject)
+        go.run(result.instance);
+
+        // start Elm
+        const app = Elm.Main.init({
+            node: document.getElementById("checkers-app"),
+            flags: newGame()
         });
     </script>
 </body>

@@ -3,9 +3,10 @@ module Main exposing (main)
 import Browser
 import Html
 import Html.Attributes exposing (alt, class, src, style)
+import Json.Decode as JD
 
 
-main : Program () Model Msg
+main : Program JD.Value Model Msg
 main =
     Browser.element
         { init = init
@@ -15,37 +16,61 @@ main =
         }
 
 
-type Slot
-    = NaS
-    | Empty
-    | BluePiece
-    | BlueKing
-    | RedPiece
-    | RedKing
+init : JD.Value -> ( Model, Cmd Msg )
+init flags =
+    let
+        rawGame =
+            case JD.decodeValue rawGameDecoder flags of
+                Ok rg ->
+                    rg
+
+                Err _ ->
+                    { state = 0
+                    , plrTurn = 0
+                    , board = List.repeat 64 0
+                    , timeSinceExcitingMove = 0
+                    , turnNumber = 1
+                    }
+    in
+    ( { rawGame = rawGame }, Cmd.none )
 
 
-newBoard : List Slot
-newBoard =
-    [ [ NaS, BluePiece, NaS, BluePiece, NaS, BluePiece, NaS, BluePiece ]
-    , [ BluePiece, NaS, BluePiece, NaS, BluePiece, NaS, BluePiece, NaS ]
-    , [ NaS, BluePiece, NaS, BluePiece, NaS, BluePiece, NaS, BluePiece ]
-    , [ Empty, NaS, Empty, NaS, BlueKing, NaS, Empty, NaS ]
-    , [ NaS, Empty, NaS, RedKing, NaS, Empty, NaS, Empty ]
-    , [ RedPiece, NaS, RedPiece, NaS, RedPiece, NaS, RedPiece, NaS ]
-    , [ NaS, RedPiece, NaS, RedPiece, NaS, RedPiece, NaS, RedPiece ]
-    , [ RedPiece, NaS, RedPiece, NaS, RedPiece, NaS, RedPiece, NaS ]
-    ]
-        |> List.concat
+{-| this type is mirroring Game struct
 
+    type Game struct {
+        State GameState
+        PlrTurn Player
+        Board Board
+        TurnNumber int
+        TimeSinceExcitingMove int
+    }
 
-type alias Model =
-    { board : List Slot
+that way, Elm is the one keeping all the state,
+and will pass it threw js to wasm(Go) when needs to make a move/ get the ai's move
+
+-}
+type alias RawGame =
+    { state : Int
+    , plrTurn : Int
+    , board : List Int
+    , turnNumber : Int
+    , timeSinceExcitingMove : Int
     }
 
 
-init : () -> ( Model, Cmd Msg )
-init _ =
-    ( Model newBoard, Cmd.none )
+rawGameDecoder : JD.Decoder RawGame
+rawGameDecoder =
+    JD.map5 RawGame
+        (JD.field "state" JD.int)
+        (JD.field "plrTurn" JD.int)
+        (JD.field "board" (JD.list JD.int))
+        (JD.field "turnNumber" JD.int)
+        (JD.field "timeSinceExcitingMove" JD.int)
+
+
+type alias Model =
+    { rawGame : RawGame
+    }
 
 
 type Msg
@@ -62,6 +87,40 @@ update msg model =
 subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.none
+
+
+intToSlot : Int -> Slot
+intToSlot n =
+    case n of
+        0 ->
+            NaS
+
+        1 ->
+            Empty
+
+        2 ->
+            BluePiece
+
+        3 ->
+            BlueKing
+
+        4 ->
+            RedPiece
+
+        5 ->
+            RedKing
+
+        _ ->
+            NaS
+
+
+type Slot
+    = NaS
+    | Empty
+    | BluePiece
+    | BlueKing
+    | RedPiece
+    | RedKing
 
 
 slotToHtml : Int -> Slot -> Html.Html msg
@@ -128,5 +187,9 @@ boardToHtml board =
 
 view : Model -> Html.Html Msg
 view model =
+    let
+        displayBoard =
+            List.map intToSlot model.rawGame.board
+    in
     Html.div [ class "main-area" ]
-        [ boardToHtml model.board ]
+        [ boardToHtml displayBoard ]
