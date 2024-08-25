@@ -69,7 +69,6 @@ func SmartAiTimeBound(g checkers.Game, timeLimit time.Duration) (me MoveEval) {
 	return bestMoveEval
 }
 
-// probably best to avoid using this function - unpredictable time usage
 func SmartAiDepthLimited(g checkers.Game, depthLimit int) (me MoveEval) {
 	var bestMoveEval MoveEval
 
@@ -80,7 +79,7 @@ func SmartAiDepthLimited(g checkers.Game, depthLimit int) (me MoveEval) {
 	return bestMoveEval
 }
 
-func calculateAllMoves(g checkers.Game, timeLimit time.Duration) []MoveEval {
+func CalculateAllMoves(g checkers.Game, depth int) []MoveEval {
 	moveEvalsChannel := make(chan MoveEval)
 
 	legalMoves := g.GetLegalMoves()
@@ -90,9 +89,8 @@ func calculateAllMoves(g checkers.Game, timeLimit time.Duration) []MoveEval {
 		(&futureGame).PlayMove(move)
 
 		go func(m checkers.Move) {
-			me := SmartAiTimeBound(futureGame, timeLimit)
-			// depth +1 because already played a move
-			moveEvalsChannel <- MoveEval{Depth: me.Depth + 1, Move: m, Eval: me.Eval}
+			me := SmartAiDepthLimited(futureGame, depth)
+			moveEvalsChannel <- MoveEval{Depth: depth, Move: m, Eval: me.Eval}
 		}(move)
 	}
 
@@ -106,30 +104,30 @@ func calculateAllMoves(g checkers.Game, timeLimit time.Duration) []MoveEval {
 	return moveEvals
 }
 
-func sortMoveEvalsHighToLow(s []MoveEval) {
+func SortMoveEvalsHighToLow(s []MoveEval) {
 	sort.Slice(s, func(i, j int) bool {
 		return s[i].Eval > s[j].Eval
 	})
 }
 
-func sortMoveEvalsLowToHigh(s []MoveEval) {
+func SortMoveEvalsLowToHigh(s []MoveEval) {
 	sort.Slice(s, func(i, j int) bool {
 		return s[i].Eval < s[j].Eval
 	})
 }
 
 type AiDifficultySetting struct {
-	TimeLimit                              time.Duration
+	DepthLimit                             int
 	WorstChance, ThirdChance, SecondChance float32
 }
 
 func DifficultySetAi(g checkers.Game, settings AiDifficultySetting) MoveEval {
-	moveEvals := calculateAllMoves(g, settings.TimeLimit)
+	moveEvals := CalculateAllMoves(g, settings.DepthLimit)
 
 	if g.PlrTurn == checkers.BluePlayer {
-		sortMoveEvalsHighToLow(moveEvals)
+		SortMoveEvalsHighToLow(moveEvals)
 	} else {
-		sortMoveEvalsLowToHigh(moveEvals)
+		SortMoveEvalsLowToHigh(moveEvals)
 	}
 
 	nMoves := len(moveEvals)

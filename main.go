@@ -14,7 +14,7 @@ func main() {
 	fmt.Println(me)
 
 	me2 := ai.DifficultySetAi(*g,
-		ai.AiDifficultySetting{TimeLimit: 100 * time.Millisecond, WorstChance: 0, ThirdChance: 0.15, SecondChance: 0.33})
+		ai.AiDifficultySetting{DepthLimit: 8, WorstChance: 0, ThirdChance: 0.15, SecondChance: 0.33})
 	fmt.Println(me2)
 
 	fmt.Println("-----")
