@@ -1,9 +1,11 @@
-module Main exposing (main)
+port module Main exposing (main)
 
 import Browser
 import Html
 import Html.Attributes exposing (alt, class, src, style)
+import Html.Events exposing (onClick)
 import Json.Decode as JD
+import Json.Encode as JE
 
 
 main : Program JD.Value Model Msg
@@ -20,19 +22,20 @@ init : JD.Value -> ( Model, Cmd Msg )
 init flags =
     let
         rawGame =
-            case JD.decodeValue rawGameDecoder flags of
+            case decodeRawGame flags of
                 Ok rg ->
                     rg
 
                 Err _ ->
-                    { state = 0
+                    { state = "Playing"
                     , plrTurn = 0
                     , board = List.repeat 64 0
                     , timeSinceExcitingMove = 0
                     , turnNumber = 1
                     }
+                        |> Debug.log "yeah failed.."
     in
-    ( { rawGame = rawGame }, Cmd.none )
+    ( { rawGame = rawGame }, translator GetNewGame )
 
 
 {-| this type is mirroring Game struct
@@ -48,9 +51,24 @@ init flags =
 that way, Elm is the one keeping all the state,
 and will pass it threw js to wasm(Go) when needs to make a move/ get the ai's move
 
+    GameState:
+
+    Playing GameState = "Playing"
+    BlueWon GameState = "Blue Won"
+    RedWon  GameState = "Red Won"
+    Draw    GameState = "Draw"
+
+    type alias RawGame =
+        { state : String
+        , plrTurn : Int
+        , board : List Int
+        , turnNumber : Int
+        , timeSinceExcitingMove : Int
+        }
+
 -}
 type alias RawGame =
-    { state : Int
+    { state : String
     , plrTurn : Int
     , board : List Int
     , turnNumber : Int
@@ -58,14 +76,29 @@ type alias RawGame =
     }
 
 
-rawGameDecoder : JD.Decoder RawGame
-rawGameDecoder =
-    JD.map5 RawGame
-        (JD.field "state" JD.int)
-        (JD.field "plrTurn" JD.int)
-        (JD.field "board" (JD.list JD.int))
-        (JD.field "turnNumber" JD.int)
-        (JD.field "timeSinceExcitingMove" JD.int)
+decodeRawGame : JD.Value -> Result JD.Error RawGame
+decodeRawGame value =
+    let
+        decoder =
+            JD.map5 RawGame
+                (JD.field "state" JD.string)
+                (JD.field "plrTurn" JD.int)
+                (JD.field "board" (JD.list JD.int))
+                (JD.field "turnNumber" JD.int)
+                (JD.field "timeSinceExcitingMove" JD.int)
+    in
+    JD.decodeValue decoder value
+
+
+encodeRawGame : RawGame -> JE.Value
+encodeRawGame rawGame =
+    JE.object
+        [ ( "state", JE.string rawGame.state )
+        , ( "plrTurn", JE.int rawGame.plrTurn )
+        , ( "board", JE.list JE.int rawGame.board )
+        , ( "turnNumber", JE.int rawGame.turnNumber )
+        , ( "timeSinceExcitingMove", JE.int rawGame.timeSinceExcitingMove )
+        ]
 
 
 type alias Model =
@@ -73,20 +106,54 @@ type alias Model =
     }
 
 
+type JsActions
+    = GetNewGame
+    | GetAiMove RawGame
+
+
+translator : JsActions -> Cmd msg
+translator action =
+    case action of
+        GetNewGame ->
+            actionRequest ( "getNewGame", JE.null )
+
+        GetAiMove rg ->
+            let
+                data =
+                    JE.object
+                        [ ( "game", encodeRawGame rg ) ]
+            in
+            actionRequest ( "getAiMove", data )
+
+
+port actionRequest : ( String, JE.Value ) -> Cmd msg
+
+
+port rawGameReceiver : (RawGame -> msg) -> Sub msg
+
+
 type Msg
-    = Msg1
+    = UpdatedGameAppeared RawGame
+    | PlayAiMove
+    | NewGame
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Msg1 ->
-            ( model, Cmd.none )
+        UpdatedGameAppeared rawGame ->
+            ( { model | rawGame = rawGame }, Cmd.none )
+
+        PlayAiMove ->
+            ( model, translator (GetAiMove model.rawGame) )
+
+        NewGame ->
+            ( model, translator GetNewGame )
 
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.none
+    rawGameReceiver UpdatedGameAppeared
 
 
 intToSlot : Int -> Slot
@@ -192,4 +259,9 @@ view model =
             List.map intToSlot model.rawGame.board
     in
     Html.div [ class "main-area" ]
-        [ boardToHtml displayBoard ]
+        [ boardToHtml displayBoard
+        , Html.div [ class "control-area" ]
+            [ Html.button [ onClick PlayAiMove ] [ Html.text "Play AI" ]
+            , Html.button [ onClick NewGame ] [ Html.text "New Game" ]
+            ]
+        ]

@@ -20,8 +20,25 @@
 
         // start Elm
         const app = Elm.Main.init({
-            node: document.getElementById("checkers-app"),
-            flags: newGame()
+            node: document.getElementById("checkers-app")
+        });
+
+        app.ports.actionRequest.subscribe(function (request) {
+            console.log(request);
+
+            let [msg, data] = request;
+
+            switch (msg) {
+                case "getNewGame":
+                    app.ports.rawGameReceiver.send(newGame());
+                    break;
+
+                case "getAiMove":
+                    app.ports.rawGameReceiver.send(getAiMove(data.game));
+                    break;
+                default:
+                    break;
+            }
         });
     </script>
 </body>
