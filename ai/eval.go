@@ -1,21 +1,8 @@
 package ai
 
 import (
-	"fmt"
-
 	"github.com/48thFlame/Checkers/checkers"
 )
-
-type moveEval struct {
-	depth int
-	move  checkers.Move
-	eval  int
-}
-
-func (me moveEval) String() string {
-	return fmt.Sprintf("(%d| %d,%d |%d)",
-		me.depth, me.move.StartI, me.move.EndI, me.eval)
-}
 
 const (
 	highestE = 199_999_999
