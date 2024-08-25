@@ -54,7 +54,7 @@ const (
 )
 
 type tableEntry struct {
-	me     moveEval
+	me     MoveEval
 	bounds tPosTableBounds
 }
 

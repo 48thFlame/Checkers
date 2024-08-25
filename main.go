@@ -5,11 +5,17 @@ import (
 	"time"
 
 	"github.com/48thFlame/Checkers/ai"
-	"github.com/48thFlame/Checkers/simpleAi"
+	"github.com/48thFlame/Checkers/checkers"
 )
 
 func main() {
-	PlayTournament(ai.SmartAi, simpleAi.SimpleAi, 200*time.Millisecond, 5)
+	g := checkers.NewGame()
+	me := ai.SmartAiTimeBound(*g, 100*time.Millisecond)
+	fmt.Println(me)
+
+	me2 := ai.DifficultySetAi(*g,
+		ai.AiDifficultySetting{TimeLimit: 100 * time.Millisecond, WorstChance: 0, ThirdChance: 0.15, SecondChance: 0.33})
+	fmt.Println(me2)
 
 	fmt.Println("-----")
 	fmt.Print(ai.MinMaxStatsMan)

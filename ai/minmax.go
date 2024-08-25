@@ -62,15 +62,15 @@ func (mms minMaxStats) String() string {
 var MinMaxStatsMan = minMaxStats{}
 
 // classic min-max with alpha beta pruning
-func minMax(agd aiGameData, legalMoves []checkers.Move, startDepth, currentDepth int, alpha, beta int) (me moveEval) {
+func minMax(agd aiGameData, legalMoves []checkers.Move, startDepth, currentDepth int, alpha, beta int) (me MoveEval) {
 	if agd.g.State != checkers.Playing {
 		MinMaxStatsMan.gameEval++
-		me.eval = gameOverEval(agd, startDepth, currentDepth)
+		me.Eval = gameOverEval(agd, startDepth, currentDepth)
 		return me
 	}
 
 	if stored, ok := agd.tPosTable[agd.h]; ok {
-		if stored.me.depth >= currentDepth {
+		if stored.me.Depth >= currentDepth {
 			if stored.bounds == exactBounds {
 				MinMaxStatsMan.tableHitsExact++
 
@@ -79,19 +79,19 @@ func minMax(agd aiGameData, legalMoves []checkers.Move, startDepth, currentDepth
 			} else if stored.bounds == lowerBounds {
 				MinMaxStatsMan.tableHitsLower++
 
-				if stored.me.eval >= beta {
+				if stored.me.Eval >= beta {
 					return stored.me
 				}
 
-				alpha = max(alpha, stored.me.eval)
+				alpha = max(alpha, stored.me.Eval)
 			} else { // upperBound
 				MinMaxStatsMan.tableHitsUpper++
 
-				if alpha >= stored.me.eval {
+				if alpha >= stored.me.Eval {
 					return stored.me
 				}
 
-				beta = min(beta, stored.me.eval)
+				beta = min(beta, stored.me.Eval)
 			}
 		}
 	}
@@ -107,17 +107,17 @@ func minMax(agd aiGameData, legalMoves []checkers.Move, startDepth, currentDepth
 
 		if agd.isInEndGame() {
 			MinMaxStatsMan.endEval++
-			me.eval = evaluateEndGamePos(agd)
+			me.Eval = evaluateEndGamePos(agd)
 			return me
 		} else {
 			MinMaxStatsMan.midEval++
-			me.eval = evaluateMidPosition(agd)
+			me.Eval = evaluateMidPosition(agd)
 			return me
 		}
 	}
 
 	if agd.g.PlrTurn == checkers.BluePlayer {
-		me.eval = lowestE
+		me.Eval = lowestE
 		localAlpha := alpha
 
 		for _, move := range legalMoves {
@@ -126,12 +126,12 @@ func minMax(agd aiGameData, legalMoves []checkers.Move, startDepth, currentDepth
 			futureLegalMoves := futureGame.g.GetLegalMoves()
 			currentMoveEval := minMax(futureGame, futureLegalMoves, startDepth, currentDepth-1, localAlpha, beta)
 
-			if currentMoveEval.eval > me.eval { // if current move is better then previously checked
-				me.move = move // its new best move
-				me.eval = currentMoveEval.eval
+			if currentMoveEval.Eval > me.Eval { // if current move is better then previously checked
+				me.Move = move // its new best move
+				me.Eval = currentMoveEval.Eval
 			}
 
-			localAlpha = max(localAlpha, currentMoveEval.eval)
+			localAlpha = max(localAlpha, currentMoveEval.Eval)
 			if beta <= localAlpha {
 				MinMaxStatsMan.alphaBetaBreak++
 				break
@@ -139,7 +139,7 @@ func minMax(agd aiGameData, legalMoves []checkers.Move, startDepth, currentDepth
 		}
 	} else {
 		// reds minimizing turn
-		me.eval = highestE
+		me.Eval = highestE
 		localBeta := beta
 
 		for _, move := range legalMoves {
@@ -148,12 +148,12 @@ func minMax(agd aiGameData, legalMoves []checkers.Move, startDepth, currentDepth
 			futureLegalMoves := futureGame.g.GetLegalMoves()
 			currentMoveEval := minMax(futureGame, futureLegalMoves, startDepth, currentDepth-1, alpha, localBeta)
 
-			if currentMoveEval.eval < me.eval {
-				me.move = move
-				me.eval = currentMoveEval.eval
+			if currentMoveEval.Eval < me.Eval {
+				me.Move = move
+				me.Eval = currentMoveEval.Eval
 			}
 
-			localBeta = min(localBeta, currentMoveEval.eval)
+			localBeta = min(localBeta, currentMoveEval.Eval)
 			if localBeta <= alpha {
 				MinMaxStatsMan.alphaBetaBreak++
 				break
@@ -163,15 +163,15 @@ func minMax(agd aiGameData, legalMoves []checkers.Move, startDepth, currentDepth
 
 	var toStoreBounds tPosTableBounds
 
-	if me.eval <= alpha {
+	if me.Eval <= alpha {
 		toStoreBounds = upperBounds
-	} else if me.eval >= beta {
+	} else if me.Eval >= beta {
 		toStoreBounds = lowerBounds
 	} else {
 		toStoreBounds = exactBounds
 	}
 
-	me.depth = currentDepth
+	me.Depth = currentDepth
 	agd.tPosTable[agd.h] = tableEntry{me: me, bounds: toStoreBounds}
 	return me
 }
