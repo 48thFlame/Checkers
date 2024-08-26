@@ -24,9 +24,7 @@
         });
 
         app.ports.actionRequest.subscribe(function (request) {
-            console.log(request);
-
-            let [msg, data] = request;
+            const [msg, data] = request;
 
             switch (msg) {
                 case "getNewGame":
@@ -34,7 +32,8 @@
                     break;
 
                 case "getAiMove":
-                    app.ports.rawGameReceiver.send(getAiMove(data.game));
+                    const updatedGame = getAiMove(data.game, data.difficulty);
+                    app.ports.rawGameReceiver.send(updatedGame);
                     break;
                 default:
                     break;

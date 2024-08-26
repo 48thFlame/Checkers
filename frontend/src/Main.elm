@@ -2,8 +2,8 @@ port module Main exposing (main)
 
 import Browser
 import Html
-import Html.Attributes exposing (alt, class, src, style)
-import Html.Events exposing (onClick)
+import Html.Attributes exposing (alt, class, selected, src, style, value)
+import Html.Events exposing (onClick, onInput)
 import Json.Decode as JD
 import Json.Encode as JE
 
@@ -27,7 +27,7 @@ init flags =
                     rg
 
                 Err _ ->
-                    { state = "Playing"
+                    { state = "Draw"
                     , plrTurn = 0
                     , board = List.repeat 64 0
                     , timeSinceExcitingMove = 0
@@ -35,7 +35,7 @@ init flags =
                     }
                         |> Debug.log "yeah failed.."
     in
-    ( { rawGame = rawGame }, translator GetNewGame )
+    ( { rg = rawGame, difficulty = Simple }, Cmd.none )
 
 
 {-| this type is mirroring Game struct
@@ -102,13 +102,108 @@ encodeRawGame rawGame =
 
 
 type alias Model =
-    { rawGame : RawGame
+    { rg : RawGame
+    , difficulty : AiDifficulty
     }
+
+
+type AiDifficulty
+    = Easy
+    | Medium
+    | Hard
+    | ExtraHard
+    | Impossible
+    | Simple
+
+
+encodeAiDifficulty : AiDifficulty -> JE.Value
+encodeAiDifficulty diff =
+    JE.int
+        (case diff of
+            Easy ->
+                1
+
+            Medium ->
+                2
+
+            Hard ->
+                3
+
+            ExtraHard ->
+                4
+
+            Impossible ->
+                5
+
+            Simple ->
+                6
+        )
+
+
+aiDifficultyToString : AiDifficulty -> String
+aiDifficultyToString diff =
+    case diff of
+        Easy ->
+            "Easy"
+
+        Medium ->
+            "Medium"
+
+        Hard ->
+            "Hard"
+
+        ExtraHard ->
+            "ExtraHard"
+
+        Impossible ->
+            "Impossible"
+
+        Simple ->
+            "Simple"
+
+
+stringToAiDifficulty : String -> AiDifficulty
+stringToAiDifficulty str =
+    case str of
+        "Easy" ->
+            Easy
+
+        "Medium" ->
+            Medium
+
+        "Hard" ->
+            Hard
+
+        "ExtraHard" ->
+            ExtraHard
+
+        "Impossible" ->
+            Impossible
+
+        "Simple" ->
+            Simple
+
+        _ ->
+            Simple
+
+
+aiDifficultyToHtmlOption : AiDifficulty -> AiDifficulty -> Html.Html msg
+aiDifficultyToHtmlOption selectedDiff diff =
+    let
+        stringedDiff =
+            aiDifficultyToString diff
+    in
+    Html.option [ value stringedDiff, selected (selectedDiff == diff) ] [ Html.text stringedDiff ]
+
+
+aiDifficulties : List AiDifficulty
+aiDifficulties =
+    [ Easy, Medium, Hard, ExtraHard, Impossible, Simple ]
 
 
 type JsActions
     = GetNewGame
-    | GetAiMove RawGame
+    | GetAiMove AiDifficulty RawGame
 
 
 translator : JsActions -> Cmd msg
@@ -117,11 +212,13 @@ translator action =
         GetNewGame ->
             actionRequest ( "getNewGame", JE.null )
 
-        GetAiMove rg ->
+        GetAiMove diff rg ->
             let
                 data =
                     JE.object
-                        [ ( "game", encodeRawGame rg ) ]
+                        [ ( "game", encodeRawGame rg )
+                        , ( "difficulty", encodeAiDifficulty diff )
+                        ]
             in
             actionRequest ( "getAiMove", data )
 
@@ -134,21 +231,25 @@ port rawGameReceiver : (RawGame -> msg) -> Sub msg
 
 type Msg
     = UpdatedGameAppeared RawGame
-    | PlayAiMove
-    | NewGame
+    | MakeAction JsActions
+    | ChangeDifficulty String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         UpdatedGameAppeared rawGame ->
-            ( { model | rawGame = rawGame }, Cmd.none )
+            ( { model | rg = rawGame }, Cmd.none )
 
-        PlayAiMove ->
-            ( model, translator (GetAiMove model.rawGame) )
+        MakeAction action ->
+            ( model, translator action )
 
-        NewGame ->
-            ( model, translator GetNewGame )
+        ChangeDifficulty stringedDiff ->
+            let
+                _ =
+                    Debug.log "what is it" stringedDiff
+            in
+            ( { model | difficulty = stringToAiDifficulty stringedDiff }, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg
@@ -256,12 +357,14 @@ view : Model -> Html.Html Msg
 view model =
     let
         displayBoard =
-            List.map intToSlot model.rawGame.board
+            List.map intToSlot model.rg.board
     in
     Html.div [ class "main-area" ]
         [ boardToHtml displayBoard
         , Html.div [ class "control-area" ]
-            [ Html.button [ onClick PlayAiMove ] [ Html.text "Play AI" ]
-            , Html.button [ onClick NewGame ] [ Html.text "New Game" ]
+            [ Html.button [ onClick (MakeAction (GetAiMove model.difficulty model.rg)) ] [ Html.text "Play AI" ]
+            , Html.button [ onClick (MakeAction GetNewGame) ] [ Html.text "New Game" ]
+            , Html.select [ onInput ChangeDifficulty ]
+                (List.map (aiDifficultyToHtmlOption model.difficulty) aiDifficulties)
             ]
         ]

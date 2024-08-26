@@ -21,6 +21,12 @@ body {
     justify-content: center;
 }
 
+.control-area {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
 .checker-board {
     display: grid;
     gap: 1px;
