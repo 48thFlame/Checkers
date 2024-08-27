@@ -50,3 +50,10 @@ func convertIntsToBoard(gObj js.Value) checkers.Board {
 
 	return board
 }
+
+func encodeMoveToJs(move checkers.Move) map[string]any {
+	return map[string]any{
+		"endI":   move.EndI,
+		"startI": move.StartI,
+	}
+}

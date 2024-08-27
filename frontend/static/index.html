@@ -15,7 +15,7 @@
         // load the WASM
         const go = new Go();
         const result = await WebAssembly.instantiateStreaming(
-            fetch("checkers.wasm"), go.importObject)
+            fetch("checkers.wasm"), go.importObject);
         go.run(result.instance);
 
         // start Elm
@@ -27,13 +27,17 @@
             const [msg, data] = request;
 
             switch (msg) {
-                case "getNewGame":
-                    app.ports.rawGameReceiver.send(newGame());
-                    break;
-
                 case "getAiMove":
                     const updatedGame = getAiMove(data.game, data.difficulty);
                     app.ports.rawGameReceiver.send(updatedGame);
+                    break;
+
+                case "getLegalMoves":
+                    console.log("yes sir");
+                    let moves = getLegalMoves(data)
+                    console.log(moves);
+
+                    app.ports.legalMovesReceiver.send(moves);
                     break;
                 default:
                     break;

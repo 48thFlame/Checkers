@@ -1,3 +1,15 @@
+*,
+*::before,
+*::after {
+    box-sizing: content-box;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+
 :root {
     --bg-color: #282828;
     --light-slot-color: #d8dacf;
@@ -7,7 +19,6 @@
 body {
     background-color: var(--bg-color);
     font-family: fantasy, Tahoma, sans-serif;
-    margin: 0;
 
     width: 100vw;
     height: 100vh;

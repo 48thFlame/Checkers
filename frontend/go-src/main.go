@@ -24,19 +24,13 @@ func doNotPanicPlease() {
 }
 
 func main() {
-	js.Global().Set("newGame", js.FuncOf(newGameWrapper))
+	// js.Global().Set("newGame", js.FuncOf(newGameWrapper))
 	js.Global().Set("getAiMove", js.FuncOf(getAiMoveWrapper))
+	js.Global().Set("getLegalMoves", js.FuncOf(getLegalMovesWrapper))
 
 	// avoid exiting the program so can call the functions that are exported to JS
 	doneCh := make(chan struct{})
 	<-doneCh
-}
-
-func newGameWrapper(this js.Value, args []js.Value) any {
-	defer doNotPanicPlease()
-
-	g := checkers.NewGame()
-	return encodeGameToJs(*g)
 }
 
 func easyAi(g checkers.Game) ai.MoveEval {
@@ -109,4 +103,18 @@ func getAiMoveWrapper(this js.Value, args []js.Value) any {
 	}
 
 	return encodeGameToJs(game)
+}
+
+func getLegalMovesWrapper(this js.Value, args []js.Value) any {
+	defer doNotPanicPlease()
+
+	game := decodeJsToGame(args[0])
+	legalMoves := game.GetLegalMoves()
+
+	jsMoves := make([]any, 0)
+	for _, m := range legalMoves {
+		jsMoves = append(jsMoves, encodeMoveToJs(m))
+	}
+
+	return jsMoves
 }
