@@ -1,7 +1,7 @@
 *,
 *::before,
 *::after {
-    box-sizing: content-box;
+    box-sizing: border-box;
 }
 
 * {
@@ -13,7 +13,8 @@
 :root {
     --bg-color: #282828;
     --light-slot-color: #d8dacf;
-    --dark-slot-color: #6e6e67;
+    --dark-slot-color: hsl(60, 3%, 42%);
+    --startI-slot-color: hsl(60, 3%, 26%);
 }
 
 body {
@@ -51,54 +52,57 @@ body {
     /* unless its a NaS, it should be dark*/
     background-color: var(--dark-slot-color);
     color: var(--light-slot-color);
+
+    pointer-events: none;
+    position: relative;
 }
 
-.NaS-slot {
+.NaS {
     background-color: var(--light-slot-color);
+    width: 100%;
+    height: 100%;
+}
+
+.piece {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.piece-img {
+    width: 90%;
+    height: 90%;
+}
+
+.slot-i {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    z-index: 1;
+}
+
+.startI-slot {
+    background-color: var(--startI-slot-color);
+    pointer-events: auto;
+}
+
+.selectedI-slot {
+    border: 3px solid greenyellow;
 }
 
 .endI-slot {
-    z-index: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+}
+
+.endI-slot-circle {
     background-color: yellowgreen;
     border-radius: 50%;
     width: 25%;
     height: 25%;
-    align-self: center;
-    justify-self: center;
-}
-
-.piece-slot {
-    display: grid;
-    align-items: center;
-    justify-items: center;
-}
-
-.startI-slot {
-    z-index: 0;
-    background-color: black;
-    opacity: 0.5;
-
-    grid-column: 1;
-    grid-row: 1;
-}
-
-.slot-img {
-    width: 92%;
-    height: 92%;
-
-    z-index: 1;
-
-    grid-column: 1;
-    grid-row: 1;
-}
-
-.slot-i {
-    grid-column: 1;
-    grid-row: 1;
-    z-index: 2;
-
-    /* put in top left of the slot*/
-    align-self: self-start;
-    justify-self: self-start;
-    margin-left: 2px;
 }

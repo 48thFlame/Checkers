@@ -10,6 +10,7 @@ type Msg
     | MakeAction JsActions
     | ChangeDifficulty String
     | NewGame
+    | SlotSelected Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -19,7 +20,7 @@ update msg model =
             ( { model | rg = rg }, translator (GetLegalMoves rg) )
 
         LegalMovesAppeared moves ->
-            ( { model | legalMoves = moves }, Cmd.none )
+            ( { model | legalMoves = moves, selectedStartI = Nothing }, Cmd.none )
 
         MakeAction action ->
             ( model, translator action )
@@ -56,6 +57,19 @@ update msg model =
             ( { model
                 | rg = startingRawGame
                 , legalMoves = startingLegalMoves
+              }
+            , Cmd.none
+            )
+
+        SlotSelected i ->
+            ( { model
+                | selectedStartI =
+                    if model.selectedStartI == Just i then
+                        -- if wants to un-select
+                        Nothing
+
+                    else
+                        Just i
               }
             , Cmd.none
             )

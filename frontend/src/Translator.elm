@@ -57,15 +57,24 @@ encodeAiDifficulty diff =
         )
 
 
+encodeMove : Move -> JE.Value
+encodeMove move =
+    JE.object
+        [ ( "startI", JE.int move.startI )
+        , ( "endI", JE.int move.endI )
+        ]
+
+
 type JsActions
-    = GetAiMove AiDifficulty RawGame
+    = GetAiMove RawGame AiDifficulty
     | GetLegalMoves RawGame
+    | MakeMove RawGame Move
 
 
 translator : JsActions -> Cmd msg
 translator action =
     case action of
-        GetAiMove diff rg ->
+        GetAiMove rg diff ->
             let
                 data =
                     JE.object
@@ -77,6 +86,16 @@ translator action =
 
         GetLegalMoves rg ->
             actionRequest ( "getLegalMoves", encodeRawGame rg )
+
+        MakeMove rg move ->
+            let
+                data =
+                    JE.object
+                        [ ( "game", encodeRawGame rg )
+                        , ( "move", encodeMove move )
+                        ]
+            in
+            actionRequest ( "makeMove", data )
 
 
 port actionRequest : ( String, JE.Value ) -> Cmd msg

@@ -6,6 +6,7 @@ init _ =
     ( { rg = startingRawGame
       , legalMoves = startingLegalMoves
       , difficulty = Simple
+      , selectedStartI = Nothing
       }
     , Cmd.none
     )
@@ -15,6 +16,7 @@ type alias Model =
     { rg : RawGame
     , legalMoves : List Move
     , difficulty : AiDifficulty
+    , selectedStartI : Maybe Int
     }
 
 
