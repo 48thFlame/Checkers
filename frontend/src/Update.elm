@@ -8,7 +8,8 @@ type Msg
     = UpdatedGameAppeared RawGame
     | LegalMovesAppeared (List Move)
     | MakeAction JsActions
-    | ChangeDifficulty AiDifficulty
+    | ChangeDifficulty String
+    | NewGame
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -18,13 +19,46 @@ update msg model =
             ( { model | rg = rg }, translator (GetLegalMoves rg) )
 
         LegalMovesAppeared moves ->
-            ( { model | legalMoves = moves |> Debug.log "from Elm" }, Cmd.none )
+            ( { model | legalMoves = moves }, Cmd.none )
 
         MakeAction action ->
             ( model, translator action )
 
-        ChangeDifficulty diff ->
-            ( { model | difficulty = diff }, Cmd.none )
+        ChangeDifficulty stringedDiff ->
+            ( { model
+                | difficulty =
+                    case stringedDiff of
+                        "Easy" ->
+                            Easy
+
+                        "Medium" ->
+                            Medium
+
+                        "Hard" ->
+                            Hard
+
+                        "ExtraHard" ->
+                            ExtraHard
+
+                        "Impossible" ->
+                            Impossible
+
+                        "Simple" ->
+                            Simple
+
+                        _ ->
+                            Simple
+              }
+            , Cmd.none
+            )
+
+        NewGame ->
+            ( { model
+                | rg = startingRawGame
+                , legalMoves = startingLegalMoves
+              }
+            , Cmd.none
+            )
 
 
 subscriptions : Model -> Sub Msg

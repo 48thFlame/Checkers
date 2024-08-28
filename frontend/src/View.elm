@@ -4,35 +4,15 @@ import Html
 import Html.Attributes exposing (alt, class, selected, src, style, value)
 import Html.Events exposing (onClick, onInput)
 import Model exposing (..)
+import Set
 import Translator exposing (..)
 import Update exposing (..)
 
 
-intToSlot : Int -> Slot
-intToSlot n =
-    case n of
-        0 ->
-            NaS
-
-        1 ->
-            Empty
-
-        2 ->
-            BluePiece
-
-        3 ->
-            BlueKing
-
-        4 ->
-            RedPiece
-
-        5 ->
-            RedKing
-
-        _ ->
-            NaS
-
-
+{-| a slot in a checkers board
+`MoveStarter` - is a slot that goes on top of a reglur one such that it shows that can start moving from there.
+`MoveEnder` is the same just for ending
+-}
 type Slot
     = NaS
     | Empty
@@ -40,11 +20,24 @@ type Slot
     | BlueKing
     | RedPiece
     | RedKing
+    | MoveStarter
+    | MoveEnder
 
 
 slotToHtml : Int -> Slot -> Html.Html msg
 slotToHtml i slot =
     let
+        rowStr =
+            (i // 8) + 1 |> String.fromInt
+
+        colStr =
+            modBy 8 i + 1 |> String.fromInt
+
+        locStyles =
+            [ style "grid-row-start" rowStr
+            , style "grid-column-start" colStr
+            ]
+
         slotISpan =
             Html.span [ class "slot-i" ]
                 [ Html.text <| String.fromInt i ]
@@ -56,125 +49,143 @@ slotToHtml i slot =
                 , class "slot-img"
                 ]
                 []
+
+        pieceSlot name =
+            Html.div (class "slot piece-slot" :: locStyles)
+                [ slotISpan
+                , slotImg name
+                ]
     in
     case slot of
         NaS ->
-            Html.div [ class "slot NaS-slot" ] []
+            Html.div (class "slot NaS-slot" :: locStyles) []
 
         Empty ->
-            Html.div [ class "slot empty-slot" ]
+            Html.div (class "slot empty-slot" :: locStyles)
                 [ slotISpan ]
 
         BluePiece ->
-            Html.div [ class "slot piece-slot" ]
-                [ slotISpan
-                , slotImg "bluePiece"
-                ]
+            pieceSlot "bluePiece"
 
         BlueKing ->
-            Html.div [ class "slot piece-slot" ]
-                [ slotISpan
-                , slotImg "blueKing"
-                ]
+            pieceSlot "blueKing"
 
         RedPiece ->
-            Html.div [ class "slot piece-slot" ]
-                [ slotISpan
-                , slotImg "redPiece"
-                ]
+            pieceSlot "redPiece"
 
         RedKing ->
-            Html.div [ class "slot piece-slot" ]
-                [ slotISpan
-                , slotImg "redKing"
-                ]
+            pieceSlot "redKing"
+
+        MoveStarter ->
+            Html.div (class "slot startI-slot" :: locStyles) []
+
+        MoveEnder ->
+            Html.div (class "slot endI-slot" :: locStyles) []
 
 
-boardToHtml : List Slot -> Html.Html Msg
-boardToHtml board =
+{-| convert list of slots to html, marking all location that are "startI" and "endI"
+-}
+viewBoard : Model -> Html.Html Msg
+viewBoard model =
     let
         stringedBoardSize =
-            String.fromInt 8
+            "8"
+
+        board =
+            List.map
+                (\n ->
+                    case n of
+                        0 ->
+                            NaS
+
+                        1 ->
+                            Empty
+
+                        2 ->
+                            BluePiece
+
+                        3 ->
+                            BlueKing
+
+                        4 ->
+                            RedPiece
+
+                        5 ->
+                            RedKing
+
+                        _ ->
+                            NaS
+                )
+                model.rg.board
+
+        startIs =
+            List.map (\move -> move.startI) model.legalMoves
+                |> Set.fromList
+                -- remove duplicates
+                |> Set.toList
+
+        endIs =
+            List.map (\move -> move.endI) model.legalMoves
+                |> Set.fromList
+                -- remove duplicates
+                |> Set.toList
+
+        startIsHtml =
+            List.map (\i -> slotToHtml i MoveStarter) startIs
+
+        endIsHtml =
+            List.map (\i -> slotToHtml i MoveEnder) endIs
     in
     Html.div
         [ class "checker-board"
         , style "grid-template-rows" ("repeat(" ++ stringedBoardSize ++ ", 1fr)")
         , style "grid-template-columns" ("repeat(" ++ stringedBoardSize ++ ", 1fr)")
         ]
-        (List.indexedMap slotToHtml board)
-
-
-aiDifficultyToString : AiDifficulty -> String
-aiDifficultyToString diff =
-    case diff of
-        Easy ->
-            "Easy"
-
-        Medium ->
-            "Medium"
-
-        Hard ->
-            "Hard"
-
-        ExtraHard ->
-            "ExtraHard"
-
-        Impossible ->
-            "Impossible"
-
-        Simple ->
-            "Simple"
-
-
-stringToAiDifficulty : String -> AiDifficulty
-stringToAiDifficulty str =
-    case str of
-        "Easy" ->
-            Easy
-
-        "Medium" ->
-            Medium
-
-        "Hard" ->
-            Hard
-
-        "ExtraHard" ->
-            ExtraHard
-
-        "Impossible" ->
-            Impossible
-
-        "Simple" ->
-            Simple
-
-        _ ->
-            Simple
+        (List.indexedMap slotToHtml board
+            ++ startIsHtml
+            ++ endIsHtml
+        )
 
 
 aiDifficultyToHtmlOption : AiDifficulty -> AiDifficulty -> Html.Html msg
 aiDifficultyToHtmlOption selectedDiff diff =
     let
         stringedDiff =
-            aiDifficultyToString diff
+            case diff of
+                Easy ->
+                    "Easy"
+
+                Medium ->
+                    "Medium"
+
+                Hard ->
+                    "Hard"
+
+                ExtraHard ->
+                    "ExtraHard"
+
+                Impossible ->
+                    "Impossible"
+
+                Simple ->
+                    "Simple"
     in
     Html.option [ value stringedDiff, selected (selectedDiff == diff) ] [ Html.text stringedDiff ]
 
 
 view : Model -> Html.Html Msg
 view model =
-    let
-        _ =
-            Debug.log "moves:" model.legalMoves
-
-        displayBoard =
-            List.map intToSlot model.rg.board
-    in
-    Html.div [ class "main-area" ]
-        [ boardToHtml displayBoard
+    Html.div [ class "app" ]
+        [ viewBoard model
         , Html.div [ class "control-area" ]
-            [ Html.button [ onClick (MakeAction (GetAiMove model.difficulty model.rg)) ] [ Html.text "Play AI" ]
-            , Html.button [ onClick (UpdatedGameAppeared startingRawGame) ] [ Html.text "New Game" ]
-            , Html.select [ onInput (\stringedDiff -> ChangeDifficulty (stringToAiDifficulty stringedDiff)) ]
+            [ Html.button
+                [ onClick (MakeAction (GetAiMove model.difficulty model.rg)) ]
+                [ Html.text "Play AI" ]
+            , Html.button
+                [ onClick NewGame ]
+                [ Html.text "New Game" ]
+            , Html.select
+                [ onInput ChangeDifficulty ]
                 (List.map (aiDifficultyToHtmlOption model.difficulty) aiDifficulties)
             ]
         ]
