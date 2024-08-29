@@ -92,20 +92,20 @@ outerSlotToHtml i slot =
 
         MoveStarter s ->
             Html.div
-                ([ class "startI-slot", onClick (SlotSelected i) ]
+                ([ class "startI-slot", onClick (StartSlotSelected i) ]
                     ++ baseAttrs
                 )
                 [ innerSlotToHtml i s ]
 
         Selected s ->
             Html.div
-                ([ class "startI-slot selectedI-slot", onClick (SlotSelected i) ]
+                ([ class "startI-slot selectedI-slot", onClick (StartSlotSelected i) ]
                     ++ baseAttrs
                 )
                 [ innerSlotToHtml i s ]
 
         MoveEnder s ->
-            Html.div (class "endI-slot" :: baseAttrs)
+            Html.div ([ class "endI-slot", onClick (EndSlotSelected i) ] ++ baseAttrs)
                 [ Html.div [ class "endI-slot-circle" ] []
                 , innerSlotToHtml i s
                 ]

@@ -33,11 +33,13 @@
                     break;
 
                 case "getLegalMoves":
-                    console.log("yes sir");
                     let moves = getLegalMoves(data)
-                    console.log(moves);
-
                     app.ports.legalMovesReceiver.send(moves);
+                    break;
+
+                case "makeMove":
+                    const game = makeMove(data.game, data.move);
+                    app.ports.rawGameReceiver.send(game);
                     break;
                 default:
                     break;

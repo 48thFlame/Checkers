@@ -10,7 +10,8 @@ type Msg
     | MakeAction JsActions
     | ChangeDifficulty String
     | NewGame
-    | SlotSelected Int
+    | StartSlotSelected Int
+    | EndSlotSelected Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -61,7 +62,7 @@ update msg model =
             , Cmd.none
             )
 
-        SlotSelected i ->
+        StartSlotSelected i ->
             ( { model
                 | selectedStartI =
                     if model.selectedStartI == Just i then
@@ -73,6 +74,31 @@ update msg model =
               }
             , Cmd.none
             )
+
+        EndSlotSelected i ->
+            -- should only be possible to get here if model.selectedStartI is a value
+            case model.selectedStartI of
+                Nothing ->
+                    ( model, Cmd.none )
+
+                Just si ->
+                    ( { model | selectedStartI = Nothing }
+                    , MakeMove model.rg { startI = si, endI = i }
+                        |> translator
+                    )
+
+
+
+-- ( { model
+--     | selectedStartI =
+--         if model.selectedStartI == Just i then
+--             -- if wants to un-select
+--             Nothing
+--         else
+--             Just i
+--   }
+-- , Cmd.none
+-- )
 
 
 subscriptions : Model -> Sub Msg

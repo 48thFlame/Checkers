@@ -57,3 +57,15 @@ func encodeMoveToJs(move checkers.Move) map[string]any {
 		"startI": move.StartI,
 	}
 }
+
+type simpleJsMove struct {
+	startI int
+	endI   int
+}
+
+func decodeJsMoveToSimpleMove(mObj js.Value) simpleJsMove {
+	return simpleJsMove{
+		startI: mObj.Get("startI").Int(),
+		endI:   mObj.Get("endI").Int(),
+	}
+}
