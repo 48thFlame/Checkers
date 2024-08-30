@@ -4,9 +4,12 @@ module Model exposing (..)
 init : () -> ( Model, Cmd msg )
 init _ =
     ( { rg = startingRawGame
-      , legalMoves = startingLegalMoves
-      , difficulty = Simple
+      , legalMoves = []
       , selectedStartI = Nothing
+      , plr1blue = Human
+      , plr2red = Ai Simple
+      , futurePlr1blue = Human
+      , futurePlr2red = Ai Simple
       }
     , Cmd.none
     )
@@ -15,9 +18,21 @@ init _ =
 type alias Model =
     { rg : RawGame
     , legalMoves : List Move
-    , difficulty : AiDifficulty
     , selectedStartI : Maybe Int
+
+    -- the ones currently playing
+    , plr1blue : Opponent
+    , plr2red : Opponent
+
+    -- the ones that will play wants presses the play button
+    , futurePlr1blue : Opponent
+    , futurePlr2red : Opponent
     }
+
+
+type Opponent
+    = Human
+    | Ai AiDifficulty
 
 
 {-| this type is mirroring Game struct

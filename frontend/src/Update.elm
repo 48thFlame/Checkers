@@ -1,6 +1,8 @@
 module Update exposing (..)
 
 import Model exposing (..)
+import Process
+import Task
 import Translator exposing (..)
 
 
@@ -8,59 +10,91 @@ type Msg
     = UpdatedGameAppeared RawGame
     | LegalMovesAppeared (List Move)
     | MakeAction JsActions
-    | ChangeDifficulty String
+    | ChangePlr1 String
+    | ChangePlr2 String
     | NewGame
     | StartSlotSelected Int
     | EndSlotSelected Int
+
+
+getPlrSelected : String -> Opponent
+getPlrSelected s =
+    case s of
+        "Human" ->
+            Human
+
+        "Easy" ->
+            Ai Easy
+
+        "Medium" ->
+            Ai Medium
+
+        "Hard" ->
+            Ai Hard
+
+        "ExtraHard" ->
+            Ai ExtraHard
+
+        "Impossible" ->
+            Ai Impossible
+
+        "Simple" ->
+            Ai Simple
+
+        _ ->
+            Human
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         UpdatedGameAppeared rg ->
-            ( { model | rg = rg }, translator (GetLegalMoves rg) )
+            -- new game appeared, should make next move
+            let
+                -- so needs to figure out who that is that should make next move
+                opponentToGo =
+                    if rg.plrTurn == 0 then
+                        model.plr1blue
 
-        LegalMovesAppeared moves ->
-            ( { model | legalMoves = moves, selectedStartI = Nothing }, Cmd.none )
+                    else
+                        model.plr2red
+            in
+            -- reset the model
+            ( { model | rg = rg, legalMoves = [], selectedStartI = Nothing }
+            , if rg.state == "Playing" then
+                case opponentToGo of
+                    Human ->
+                        -- if human should go, then should get legal moves so it
+                        -- will be displayed and clickable
+                        translator (GetLegalMoves rg)
+
+                    Ai diff ->
+                        -- not a great solution to make the board display and then get move
+                        Process.sleep 100
+                            |> Task.perform
+                                (always (MakeAction <| GetAiMove rg diff))
+
+              else
+                Cmd.none
+            )
 
         MakeAction action ->
             ( model, translator action )
 
-        ChangeDifficulty stringedDiff ->
-            ( { model
-                | difficulty =
-                    case stringedDiff of
-                        "Easy" ->
-                            Easy
+        LegalMovesAppeared moves ->
+            ( { model | legalMoves = moves }, Cmd.none )
 
-                        "Medium" ->
-                            Medium
+        ChangePlr1 s ->
+            ( { model | futurePlr1blue = getPlrSelected s }, Cmd.none )
 
-                        "Hard" ->
-                            Hard
-
-                        "ExtraHard" ->
-                            ExtraHard
-
-                        "Impossible" ->
-                            Impossible
-
-                        "Simple" ->
-                            Simple
-
-                        _ ->
-                            Simple
-              }
-            , Cmd.none
-            )
+        ChangePlr2 s ->
+            ( { model | futurePlr2red = getPlrSelected s }, Cmd.none )
 
         NewGame ->
-            ( { model
-                | rg = startingRawGame
-                , legalMoves = startingLegalMoves
-              }
-            , Cmd.none
-            )
+            -- flip future players to current
+            -- start new game by calling update
+            { model | plr1blue = model.futurePlr1blue, plr2red = model.futurePlr2red }
+                |> update (UpdatedGameAppeared startingRawGame)
 
         StartSlotSelected i ->
             ( { model
@@ -83,22 +117,8 @@ update msg model =
 
                 Just si ->
                     ( { model | selectedStartI = Nothing }
-                    , MakeMove model.rg { startI = si, endI = i }
-                        |> translator
+                    , translator (MakeMove model.rg { startI = si, endI = i })
                     )
-
-
-
--- ( { model
---     | selectedStartI =
---         if model.selectedStartI == Just i then
---             -- if wants to un-select
---             Nothing
---         else
---             Just i
---   }
--- , Cmd.none
--- )
 
 
 subscriptions : Model -> Sub Msg

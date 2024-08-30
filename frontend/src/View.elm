@@ -1,7 +1,7 @@
 module View exposing (..)
 
 import Html
-import Html.Attributes exposing (alt, class, selected, src, style, value)
+import Html.Attributes exposing (alt, attribute, class, for, id, selected, src, style, value)
 import Html.Events exposing (onClick, onInput)
 import Model exposing (..)
 import Set
@@ -13,7 +13,7 @@ import Update exposing (..)
 `MoveStarter` - is a slot that goes on top of a regular one such that it shows that can start moving from there.
 `MoveEnder` is the same just for ending
 -}
-type Slot
+type BaseSlot
     = NaS
     | Empty
     | BluePiece
@@ -23,14 +23,14 @@ type Slot
 
 
 type OuterSlot
-    = MoveStarter Slot
-    | Selected Slot
-    | MoveEnder Slot
-    | Regular Slot
+    = MoveStarter BaseSlot
+    | Selected BaseSlot
+    | MoveEnder BaseSlot
+    | Regular BaseSlot
 
 
-innerSlotToHtml : Int -> Slot -> Html.Html Msg
-innerSlotToHtml i slot =
+baseSlotToHtml : Int -> BaseSlot -> Html.Html Msg
+baseSlotToHtml i slot =
     let
         slotISpan =
             Html.span [ class "slot-i" ]
@@ -55,8 +55,7 @@ innerSlotToHtml i slot =
             Html.div [ class "NaS" ] []
 
         Empty ->
-            Html.div [ class "empty" ]
-                [ slotISpan ]
+            Html.div [ class "empty" ] [ slotISpan ]
 
         BluePiece ->
             piece "bluePiece"
@@ -88,26 +87,26 @@ outerSlotToHtml i slot =
     in
     case slot of
         Regular s ->
-            Html.div baseAttrs [ innerSlotToHtml i s ]
+            Html.div baseAttrs [ baseSlotToHtml i s ]
 
         MoveStarter s ->
             Html.div
                 ([ class "startI-slot", onClick (StartSlotSelected i) ]
                     ++ baseAttrs
                 )
-                [ innerSlotToHtml i s ]
+                [ baseSlotToHtml i s ]
 
         Selected s ->
             Html.div
                 ([ class "startI-slot selectedI-slot", onClick (StartSlotSelected i) ]
                     ++ baseAttrs
                 )
-                [ innerSlotToHtml i s ]
+                [ baseSlotToHtml i s ]
 
         MoveEnder s ->
             Html.div ([ class "endI-slot", onClick (EndSlotSelected i) ] ++ baseAttrs)
                 [ Html.div [ class "endI-slot-circle" ] []
-                , innerSlotToHtml i s
+                , baseSlotToHtml i s
                 ]
 
 
@@ -130,7 +129,7 @@ viewBoard model =
                     List.filter (\move -> move.startI == si) model.legalMoves
                         |> List.map (\move -> move.endI)
 
-        innerSlotToOuter i s =
+        baseSlotToOuterSlot i s =
             if Just i == model.selectedStartI then
                 Selected s
 
@@ -143,44 +142,42 @@ viewBoard model =
             else
                 Regular s
 
-        slots =
-            List.map
-                (\n ->
-                    case n of
-                        0 ->
-                            NaS
+        intToBaseSlot n =
+            case n of
+                0 ->
+                    NaS
 
-                        1 ->
-                            Empty
+                1 ->
+                    Empty
 
-                        2 ->
-                            BluePiece
+                2 ->
+                    BluePiece
 
-                        3 ->
-                            BlueKing
+                3 ->
+                    BlueKing
 
-                        4 ->
-                            RedPiece
+                4 ->
+                    RedPiece
 
-                        5 ->
-                            RedKing
+                5 ->
+                    RedKing
 
-                        _ ->
-                            NaS
-                )
-                model.rg.board
-                |> List.indexedMap innerSlotToOuter
+                _ ->
+                    NaS
     in
     Html.div
         [ class "checker-board"
         , style "grid-template-rows" "repeat(8, 1fr)"
         , style "grid-template-columns" "repeat(8, 1fr)"
         ]
-        (List.indexedMap outerSlotToHtml slots)
+        (List.map intToBaseSlot model.rg.board
+            |> List.indexedMap baseSlotToOuterSlot
+            |> List.indexedMap outerSlotToHtml
+        )
 
 
-aiDifficultyToHtmlOption : AiDifficulty -> AiDifficulty -> Html.Html msg
-aiDifficultyToHtmlOption selectedDiff diff =
+aiDifficultyToHtmlOption : Maybe AiDifficulty -> AiDifficulty -> Html.Html msg
+aiDifficultyToHtmlOption md diff =
     let
         stringedDiff =
             case diff of
@@ -202,22 +199,66 @@ aiDifficultyToHtmlOption selectedDiff diff =
                 Simple ->
                     "Simple"
     in
-    Html.option [ value stringedDiff, selected (selectedDiff == diff) ] [ Html.text stringedDiff ]
+    Html.option
+        [ value stringedDiff, selected (Just diff == md) ]
+        [ Html.text stringedDiff ]
+
+
+
+-- [ Html.button
+--     [ onClick (MakeAction (GetAiMove model.rg model.difficulty)) ]
+--     [ Html.text "Play AI" ]
+-- , Html.button
+--     [ class "newGame-button", onClick NewGame ]
+--     [ Html.text "New Game" ]
+-- , Html.select
+--     [ onInput ChangeDifficulty ]
+--     (List.map (aiDifficultyToHtmlOption model.difficulty) aiDifficulties)
+-- ]
+
+
+plrSelectOptions : Opponent -> List (Html.Html Msg)
+plrSelectOptions opp =
+    let
+        md =
+            case opp of
+                Human ->
+                    Nothing
+
+                Ai diff ->
+                    Just diff
+    in
+    [ Html.option [ value "Human", selected (opp == Human) ] [ Html.text "You" ]
+    , Html.hr [] []
+    , Html.optgroup
+        [ attribute "label" "Ai Difficulties" ]
+        (List.map (aiDifficultyToHtmlOption md) aiDifficulties)
+    ]
+
+
+viewControlArea : Model -> Html.Html Msg
+viewControlArea model =
+    Html.div [ class "control-area" ]
+        [ Html.label
+            [ for "plr1-select", class "plr-select-label" ]
+            [ Html.text "Player 1:" ]
+        , Html.select
+            [ id "plr1-select", class "plr-select plr1-select", onInput ChangePlr1 ]
+            (plrSelectOptions model.futurePlr1blue)
+        , Html.label
+            [ for "plr2-select", class "plr-select-label" ]
+            [ Html.text "Player 2:" ]
+        , Html.select
+            [ id "plr2-select", class "plr-select plr2-select", onInput ChangePlr2 ]
+            (plrSelectOptions model.futurePlr2red)
+        , Html.button [ class "newGame-button", onClick NewGame ] [ Html.text "Play!" ]
+        ]
 
 
 view : Model -> Html.Html Msg
 view model =
     Html.div [ class "app" ]
-        [ viewBoard model
-        , Html.div [ class "control-area" ]
-            [ Html.button
-                [ onClick (MakeAction (GetAiMove model.rg model.difficulty)) ]
-                [ Html.text "Play AI" ]
-            , Html.button
-                [ onClick NewGame ]
-                [ Html.text "New Game" ]
-            , Html.select
-                [ onInput ChangeDifficulty ]
-                (List.map (aiDifficultyToHtmlOption model.difficulty) aiDifficulties)
-            ]
+        [ Html.h1 [] [ Html.text "Play Checkers!" ]
+        , viewBoard model
+        , viewControlArea model
         ]
