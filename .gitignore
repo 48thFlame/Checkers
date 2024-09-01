@@ -3,8 +3,4 @@
 archive
 
 elm-stuff
-elm.js
 elm-watch.json
-
-checkers.wasm
-wasm_exec.js
