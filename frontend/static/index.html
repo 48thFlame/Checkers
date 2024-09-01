@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Checkers</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="wasm_exec.js"></script>
+    <script src="elm.js"></script>
+</head>
+
+<body>
+    <div id="checkers-app"></div>
+    <script type="module">
+        // load the WASM
+        const go = new Go();
+        const result = await WebAssembly.instantiateStreaming(
+            fetch("checkers.wasm"), go.importObject);
+        go.run(result.instance);
+
+        // start Elm
+        const app = Elm.Main.init({
+            node: document.getElementById("checkers-app")
+        });
+
+        app.ports.actionRequest.subscribe(function (request) {
+            const [msg, data] = request;
+
+            switch (msg) {
+                case "getAiMove":
+                    const updatedGame = getAiMove(data.game, data.difficulty);
+                    app.ports.rawGameReceiver.send(updatedGame);
+                    break;
+
+                case "getLegalMoves":
+                    let moves = getLegalMoves(data)
+                    app.ports.legalMovesReceiver.send(moves);
+                    break;
+
+                case "makeMove":
+                    const game = makeMove(data.game, data.move);
+                    app.ports.rawGameReceiver.send(game);
+                    break;
+                default:
+                    break;
+            }
+        });
+    </script>
+</body>
+
+</html>
