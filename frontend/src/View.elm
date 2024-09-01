@@ -180,6 +180,29 @@ viewBoard model =
 
                 _ ->
                     NaS
+
+        gameStateDiv =
+            Html.div [ class "game-state", style "grid-area" "1/1/9/9" ]
+                [ Html.p [ class "game-state-text" ]
+                    [ Html.text
+                        (case model.rg.state of
+                            "Draw" ->
+                                "Game ended in a draw.."
+
+                            "Blue Won" ->
+                                "Blue won the game!!"
+
+                            "Red Won" ->
+                                "Red won the game!!"
+
+                            _ ->
+                                ""
+                        )
+                    , Html.br [] []
+                    , Html.br [] []
+                    , Html.text "Pres \"Play\" button to play another game."
+                    ]
+                ]
     in
     Html.div
         [ class "checker-board"
@@ -190,6 +213,12 @@ viewBoard model =
             |> List.map intToBaseSlot
             |> List.indexedMap baseSlotToOuterSlot
             |> List.indexedMap (outerSlotToHtml model.boardFlipped)
+            |> (if model.rg.state /= "Playing" then
+                    List.append [ gameStateDiv ]
+
+                else
+                    identity
+               )
         )
 
 

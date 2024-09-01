@@ -44,6 +44,21 @@ body {
     overflow: hidden;
 }
 
+
+.game-state {
+    z-index: 10;
+    background-color: rgba(128, 128, 128, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.game-state-text {
+    color: #000000;
+    font-size: xx-large;
+    font-weight: bold;
+}
+
 .slot {
     width: 100%;
     height: 100%;

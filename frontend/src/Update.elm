@@ -98,7 +98,7 @@ update msg model =
                 |> update (UpdatedGameAppeared startingRawGame)
 
         FlipBoard ->
-            ( { model | boardFlipped = not model.boardFlipped |> Debug.log "boardFlipped" }, Cmd.none )
+            ( { model | boardFlipped = not model.boardFlipped }, Cmd.none )
 
         StartSlotSelected i ->
             ( { model
