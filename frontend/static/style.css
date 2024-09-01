@@ -153,6 +153,7 @@ body {
 
 .plr2-select {
     background-color: hsl(0, 71%, 67%);
+    margin-right: 24px;
 }
 
 .control-spacer {

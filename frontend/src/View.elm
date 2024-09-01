@@ -1,7 +1,7 @@
 module View exposing (..)
 
 import Html
-import Html.Attributes exposing (alt, attribute, class, for, id, selected, src, style, value)
+import Html.Attributes exposing (alt, attribute, class, for, href, id, selected, src, style, value)
 import Html.Events exposing (onClick, onInput)
 import Model exposing (..)
 import Set
@@ -284,7 +284,6 @@ viewControlArea model =
         , Html.select
             [ id "plr2-select", class "ctrl-obj plr-select plr2-select", onInput ChangePlr2 ]
             (plrSelectOptions model.futurePlr2red)
-        , Html.div [ class "control-spacer" ] []
         , Html.button
             [ class "ctrl-obj ctrl-button newGame-button", onClick NewGame ]
             [ Html.text "Play!" ]
@@ -300,4 +299,14 @@ view model =
         [ Html.h1 [] [ Html.text "Play Checkers!" ]
         , viewBoard model
         , viewControlArea model
+        , Html.div [ class "credits" ]
+            [ Html.p []
+                [ Html.text "Website and Bot made by "
+                , Html.a [ href "https://github.com/48thFlame" ]
+                    [ Html.text "48thFlame" ]
+                , Html.text " "
+                , Html.a [ href "https://github.com/48thFlame/Checkers" ]
+                    [ Html.text "Repo" ]
+                ]
+            ]
         ]
