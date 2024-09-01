@@ -71,7 +71,7 @@ update msg model =
 
                     Ai diff ->
                         -- not a great solution to make the board display and then get move
-                        Process.sleep 100
+                        Process.sleep 300
                             |> Task.perform
                                 (always (MakeAction <| GetAiMove rg diff))
 
@@ -92,20 +92,12 @@ update msg model =
             ( { model | futurePlr2red = getPlrSelected s }, Cmd.none )
 
         NewGame ->
-            let
-                _ =
-                    Debug.log "i ma alive soemtimes"
-            in
             -- flip future players to current
             -- start new game by calling update
             { model | plr1blue = model.futurePlr1blue, plr2red = model.futurePlr2red }
                 |> update (UpdatedGameAppeared startingRawGame)
 
         FlipBoard ->
-            let
-                _ =
-                    Debug.log "got here"
-            in
             ( { model | boardFlipped = not model.boardFlipped |> Debug.log "boardFlipped" }, Cmd.none )
 
         StartSlotSelected i ->

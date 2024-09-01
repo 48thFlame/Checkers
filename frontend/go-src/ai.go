@@ -9,28 +9,28 @@ func easyAi(g checkers.Game) ai.MoveEval {
 	return ai.DifficultySetAi(g,
 		ai.AiDifficultySetting{
 			DepthLimit:  4,
-			WorstChance: 0.23, ThirdChance: 0.28, SecondChance: 0.46})
+			WorstChance: 0.20, ThirdChance: 0.28, SecondChance: 0.46})
 }
 
 func mediumAi(g checkers.Game) ai.MoveEval {
 	return ai.DifficultySetAi(g,
 		ai.AiDifficultySetting{
 			DepthLimit:  5,
-			WorstChance: 0.12, ThirdChance: 0.29, SecondChance: 0.37})
+			WorstChance: 0.11, ThirdChance: 0.23, SecondChance: 0.33})
 }
 
 func hardAi(g checkers.Game) ai.MoveEval {
 	return ai.DifficultySetAi(g,
 		ai.AiDifficultySetting{
 			DepthLimit:  7,
-			WorstChance: 0.08, ThirdChance: 0.22, SecondChance: 0.33})
+			WorstChance: 0.06, ThirdChance: 0.17, SecondChance: 0.25})
 }
 
 func extraHardAi(g checkers.Game) ai.MoveEval {
 	return ai.DifficultySetAi(g,
 		ai.AiDifficultySetting{
 			DepthLimit:  8,
-			WorstChance: 0.04, ThirdChance: 0.14, SecondChance: 0.23})
+			WorstChance: 0.03, ThirdChance: 0.1, SecondChance: 0.15})
 }
 
 func impossibleAi(g checkers.Game) ai.MoveEval {
@@ -38,7 +38,7 @@ func impossibleAi(g checkers.Game) ai.MoveEval {
 }
 
 func simpleAi(g checkers.Game) ai.MoveEval {
-	return ai.SmartAiDepthLimited(g, 4)
+	return ai.SmartAiDepthLimited(g, 5)
 }
 
 func getAiDiffFunc(diff int) func(checkers.Game) ai.MoveEval {
