@@ -70,14 +70,30 @@ baseSlotToHtml i slot =
             piece "redKing"
 
 
-outerSlotToHtml : Int -> OuterSlot -> Html.Html Msg
-outerSlotToHtml i slot =
+outerSlotToHtml : Bool -> Int -> OuterSlot -> Html.Html Msg
+outerSlotToHtml flipped i slot =
     let
         rowStr =
-            (i // 8) + 1 |> String.fromInt
+            (i // 8)
+                + 1
+                |> (if flipped then
+                        \ri -> 9 - ri
+
+                    else
+                        identity
+                   )
+                |> String.fromInt
 
         colStr =
-            modBy 8 i + 1 |> String.fromInt
+            modBy 8 i
+                + 1
+                |> (if flipped then
+                        \ci -> 9 - ci
+
+                    else
+                        identity
+                   )
+                |> String.fromInt
 
         baseAttrs =
             [ style "grid-row-start" rowStr
@@ -170,9 +186,10 @@ viewBoard model =
         , style "grid-template-rows" "repeat(8, 1fr)"
         , style "grid-template-columns" "repeat(8, 1fr)"
         ]
-        (List.map intToBaseSlot model.rg.board
+        (model.rg.board
+            |> List.map intToBaseSlot
             |> List.indexedMap baseSlotToOuterSlot
-            |> List.indexedMap outerSlotToHtml
+            |> List.indexedMap (outerSlotToHtml model.boardFlipped)
         )
 
 
@@ -204,19 +221,6 @@ aiDifficultyToHtmlOption md diff =
         [ Html.text stringedDiff ]
 
 
-
--- [ Html.button
---     [ onClick (MakeAction (GetAiMove model.rg model.difficulty)) ]
---     [ Html.text "Play AI" ]
--- , Html.button
---     [ class "newGame-button", onClick NewGame ]
---     [ Html.text "New Game" ]
--- , Html.select
---     [ onInput ChangeDifficulty ]
---     (List.map (aiDifficultyToHtmlOption model.difficulty) aiDifficulties)
--- ]
-
-
 plrSelectOptions : Opponent -> List (Html.Html Msg)
 plrSelectOptions opp =
     let
@@ -243,15 +247,21 @@ viewControlArea model =
             [ for "plr1-select", class "plr-select-label" ]
             [ Html.text "Player 1:" ]
         , Html.select
-            [ id "plr1-select", class "plr-select plr1-select", onInput ChangePlr1 ]
+            [ id "plr1-select", class "ctrl-obj plr-select plr1-select", onInput ChangePlr1 ]
             (plrSelectOptions model.futurePlr1blue)
         , Html.label
             [ for "plr2-select", class "plr-select-label" ]
             [ Html.text "Player 2:" ]
         , Html.select
-            [ id "plr2-select", class "plr-select plr2-select", onInput ChangePlr2 ]
+            [ id "plr2-select", class "ctrl-obj plr-select plr2-select", onInput ChangePlr2 ]
             (plrSelectOptions model.futurePlr2red)
-        , Html.button [ class "newGame-button", onClick NewGame ] [ Html.text "Play!" ]
+        , Html.div [ class "control-spacer" ] []
+        , Html.button
+            [ class "ctrl-obj ctrl-button newGame-button", onClick NewGame ]
+            [ Html.text "Play!" ]
+        , Html.button
+            [ class "ctrl-obj ctrl-button flipBoard-button", onClick FlipBoard ]
+            [ Html.text "Flip Board" ]
         ]
 
 

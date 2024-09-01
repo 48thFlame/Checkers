@@ -6,6 +6,7 @@ init _ =
     ( { rg = startingRawGame
       , legalMoves = []
       , selectedStartI = Nothing
+      , boardFlipped = False
       , plr1blue = Human
       , plr2red = Ai Simple
       , futurePlr1blue = Human
@@ -19,6 +20,7 @@ type alias Model =
     { rg : RawGame
     , legalMoves : List Move
     , selectedStartI : Maybe Int
+    , boardFlipped : Bool
 
     -- the ones currently playing
     , plr1blue : Opponent

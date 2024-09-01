@@ -13,6 +13,7 @@ type Msg
     | ChangePlr1 String
     | ChangePlr2 String
     | NewGame
+    | FlipBoard
     | StartSlotSelected Int
     | EndSlotSelected Int
 
@@ -91,10 +92,21 @@ update msg model =
             ( { model | futurePlr2red = getPlrSelected s }, Cmd.none )
 
         NewGame ->
+            let
+                _ =
+                    Debug.log "i ma alive soemtimes"
+            in
             -- flip future players to current
             -- start new game by calling update
             { model | plr1blue = model.futurePlr1blue, plr2red = model.futurePlr2red }
                 |> update (UpdatedGameAppeared startingRawGame)
+
+        FlipBoard ->
+            let
+                _ =
+                    Debug.log "got here"
+            in
+            ( { model | boardFlipped = not model.boardFlipped |> Debug.log "boardFlipped" }, Cmd.none )
 
         StartSlotSelected i ->
             ( { model
