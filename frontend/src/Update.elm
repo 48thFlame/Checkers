@@ -14,6 +14,7 @@ type Msg
     | ChangePlr2 String
     | NewGame
     | FlipBoard
+    | UnselectStartI
     | StartSlotSelected Int
     | EndSlotSelected Int
 
@@ -112,6 +113,9 @@ update msg model =
               }
             , Cmd.none
             )
+
+        UnselectStartI ->
+            ( { model | selectedStartI = Nothing }, Cmd.none )
 
         EndSlotSelected i ->
             -- should only be possible to get here if model.selectedStartI is a value

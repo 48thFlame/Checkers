@@ -42,6 +42,7 @@ body {
     gap: 1px;
     aspect-ratio: 1/1;
     overflow: hidden;
+    user-select: none;
 }
 
 
@@ -67,7 +68,7 @@ body {
     background-color: var(--dark-slot-color);
     color: var(--light-slot-color);
 
-    pointer-events: none;
+    /* pointer-events: auto; */
     position: relative;
 }
 
@@ -100,7 +101,6 @@ body {
 
 .startI-slot {
     background-color: var(--startI-slot-color);
-    pointer-events: auto;
 }
 
 .selectedI-slot {
@@ -111,7 +111,6 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    pointer-events: auto;
 }
 
 .endI-slot-circle {

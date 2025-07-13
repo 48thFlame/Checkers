@@ -1,8 +1,8 @@
 module View exposing (..)
 
 import Html
-import Html.Attributes exposing (alt, attribute, class, for, href, id, selected, src, style, value)
-import Html.Events exposing (onClick, onInput)
+import Html.Attributes exposing (alt, attribute, class, draggable, for, href, id, selected, src, style, value)
+import Html.Events exposing (onClick, onInput, onMouseDown, onMouseUp)
 import Model exposing (..)
 import Set
 import Translator exposing (..)
@@ -41,6 +41,7 @@ baseSlotToHtml i slot =
                 [ src ("assets/" ++ pieceName ++ ".webp")
                 , alt pieceName
                 , class "piece-img"
+                , draggable "false"
                 ]
                 []
 
@@ -100,27 +101,30 @@ outerSlotToHtml flipped i slot =
             , style "grid-column-start" colStr
             , class "slot"
             ]
+
+        deSelectStartI =
+            onMouseUp UnselectStartI
     in
     case slot of
         Regular s ->
-            Html.div baseAttrs [ baseSlotToHtml i s ]
+            Html.div (deSelectStartI :: baseAttrs) [ baseSlotToHtml i s ]
 
         MoveStarter s ->
             Html.div
-                ([ class "startI-slot", onClick (StartSlotSelected i) ]
+                ([ class "startI-slot", onMouseDown (StartSlotSelected i), deSelectStartI ]
                     ++ baseAttrs
                 )
                 [ baseSlotToHtml i s ]
 
         Selected s ->
             Html.div
-                ([ class "startI-slot selectedI-slot", onClick (StartSlotSelected i) ]
+                ([ class "startI-slot selectedI-slot", deSelectStartI ]
                     ++ baseAttrs
                 )
                 [ baseSlotToHtml i s ]
 
         MoveEnder s ->
-            Html.div ([ class "endI-slot", onClick (EndSlotSelected i) ] ++ baseAttrs)
+            Html.div ([ class "endI-slot", onMouseUp (EndSlotSelected i) ] ++ baseAttrs)
                 [ Html.div [ class "endI-slot-circle" ] []
                 , baseSlotToHtml i s
                 ]
