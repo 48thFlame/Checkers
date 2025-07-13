@@ -4,6 +4,8 @@ import (
 	"github.com/48thFlame/Checkers/checkers"
 )
 
+//TODO: https://g.co/gemini/share/d5b2955d26b2
+
 const (
 	highestE = 199_999_999
 	lowestE  = highestE * -1

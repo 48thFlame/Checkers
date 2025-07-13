@@ -125,9 +125,9 @@ body {
     display: flex;
     flex-direction: row;
     align-items: center;
-    height: 8%;
-    min-height: 50PX;
-    max-height: 100px;
+    /* height: 8%; */
+    /* min-height: 50PX;
+    max-height: 100px; */
     margin: 2px;
 }
 

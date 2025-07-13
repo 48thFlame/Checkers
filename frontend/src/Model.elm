@@ -17,7 +17,7 @@ init _ =
 
 
 type alias Model =
-    { rg : RawGame
+    { rg : RawGame -- see `RawGame` doc
     , legalMoves : List Move
     , selectedStartI : Maybe Int
     , boardFlipped : Bool
@@ -26,7 +26,7 @@ type alias Model =
     , plr1blue : Opponent
     , plr2red : Opponent
 
-    -- the ones that will play wants presses the play button
+    -- the ones that will play once presses the play button
     , futurePlr1blue : Opponent
     , futurePlr2red : Opponent
     }

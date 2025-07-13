@@ -1,5 +1,9 @@
 package ai
 
+// agd = AI Game Data
+// this is a type that holds all the AI-game data,
+// the AI uses this to calculate forward and make decisions
+
 import (
 	"math/rand"
 
@@ -12,7 +16,11 @@ const (
 	zNPieceTypes = 4
 )
 
-// 4 types of pieces, 64 spots for them (technically only 32 but for convince)
+// 4 types of pieces, 64 spots for them (technically only 32 but for convenience)
+// zobristKeys is a 2-d array of zobrist keys, where the first index is the piece type
+// and the second index is the board slot index
+// this is used to calculate the hash of the board position
+// this way each piece type has a different zobrist key for each slot its on
 type zobristKeys [zNPieceTypes][checkers.BoardSize]zHash
 
 func generateZobristKeys() *zobristKeys {
@@ -45,6 +53,11 @@ func pieceTypeToZKI(piece checkers.BoardSlot) int {
 	panic("No Zobrist Key for that piece")
 }
 
+// this represents the bounds of a transposition table entry
+// it can be exact, lower or upper bounds
+// bounds means that the value is at least or at most the value of the entry
+// this is used to prune the search tree in the AI
+// if the bounds are exact, then the value is the exact value of the entry
 type tPosTableBounds uint8
 
 const (

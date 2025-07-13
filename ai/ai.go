@@ -2,7 +2,6 @@ package ai
 
 import (
 	"fmt"
-	"math/rand"
 	"slices"
 	"sort"
 	"time"
@@ -29,6 +28,7 @@ func sameMove(a, b checkers.Move) bool {
 	return slices.Equal(a.CapturedPiecesI, b.CapturedPiecesI)
 }
 
+// SmartAiTimeBound calculates the best move for the AI within a time limit.
 func SmartAiTimeBound(g checkers.Game, timeLimit time.Duration) (me MoveEval) {
 	var bestMoveEval MoveEval
 
@@ -69,6 +69,7 @@ func SmartAiTimeBound(g checkers.Game, timeLimit time.Duration) (me MoveEval) {
 	return bestMoveEval
 }
 
+// SmartAiDepthLimited calculates the best move for the AI with a depth-search limit.
 func SmartAiDepthLimited(g checkers.Game, depthLimit int) (me MoveEval) {
 	var bestMoveEval MoveEval
 
@@ -79,6 +80,8 @@ func SmartAiDepthLimited(g checkers.Game, depthLimit int) (me MoveEval) {
 	return bestMoveEval
 }
 
+// CalculateAllMoves calculates all legal moves for this turn and evaluates them.
+// Doesn't just find the best move, it checks all the moves/
 func CalculateAllMoves(g checkers.Game, depth int) []MoveEval {
 	moveEvalsChannel := make(chan MoveEval)
 
@@ -114,38 +117,4 @@ func SortMoveEvalsLowToHigh(s []MoveEval) {
 	sort.Slice(s, func(i, j int) bool {
 		return s[i].Eval < s[j].Eval
 	})
-}
-
-type AiDifficultySetting struct {
-	DepthLimit                             int
-	WorstChance, ThirdChance, SecondChance float32
-}
-
-func DifficultySetAi(g checkers.Game, settings AiDifficultySetting) MoveEval {
-	moveEvals := CalculateAllMoves(g, settings.DepthLimit)
-
-	if g.PlrTurn == checkers.BluePlayer {
-		SortMoveEvalsHighToLow(moveEvals)
-	} else {
-		SortMoveEvalsLowToHigh(moveEvals)
-	}
-
-	nMoves := len(moveEvals)
-
-	moveEvalToPlay := moveEvals[0]
-
-	if nMoves > 2 { // at least 3 option - sometimes shouldn't play best move
-		randomNum := rand.Float32()
-
-		if randomNum < settings.WorstChance {
-			// play worst move
-			moveEvalToPlay = moveEvals[nMoves-1]
-		} else if randomNum < settings.ThirdChance {
-			moveEvalToPlay = moveEvals[2] // 3rd best move
-		} else if randomNum < settings.SecondChance {
-			moveEvalToPlay = moveEvals[1] // 2nd move
-		}
-	}
-
-	return moveEvalToPlay
 }

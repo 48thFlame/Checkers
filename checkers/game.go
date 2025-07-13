@@ -46,6 +46,8 @@ i = (cols_num * row) + col
 col = mod(i, cols_num)
 row = floor(i / cols_num)
 */
+// TODO: this only needs to hold 32 slots (given that we don't care about Nas)
+// TODO: should really be using bit-boards
 type Board [BoardSize]BoardSlot
 
 // NewBoard() returns an initialized board set-up for a checkers game

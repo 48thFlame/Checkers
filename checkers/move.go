@@ -1,14 +1,18 @@
 package checkers
 
 /*
+Given that we are in a spot, and want to check the slots of moving, these are true.
+
 Safe to check also edges because if its really an edge and cant go to a side,
 after calculation its ends up in a Nas.
 
 cn = colsNum = BoardSideSize
 
 -cn-1 -cn -cn+1
--1 0 1
-cn-1 cn cn+1
+
+	-1    0    1
+
+cn-1   cn  cn+1
 */
 const (
 	downLeftCalc  = BoardSideSize - 1
@@ -24,6 +28,7 @@ var (
 	// red goes up
 	RedDirCalcs = [...]int{upLeftCalc, upRightCalc}
 
+	// TODO: maybe also flying kings for non American checkers?
 	KingDirCalcs = [...]int{downLeftCalc, downRightCalc, upLeftCalc, upRightCalc}
 )
 
@@ -50,14 +55,14 @@ func GetSlotAfterCalc(b Board, i, dirCalc int) (BoardSlot, int) {
 	newI := i + dirCalc
 
 	// 0 is always a Nas so < and not <=
-	if 0 < newI && newI < BoardSize {
+	if 0 < newI && newI < BoardSize { // only in bounds
 		return b[newI], newI
 	} else {
 		return NaS, -1
 	}
 }
 
-// returns `directionsToUse` and whether slot matches plr - if not wrong turn and wrong slot
+// returns `directionsToUse` and whether the slot matches plr - if not wrong turn and wrong slot
 func GetDirectionsToUse(plr Player, slot BoardSlot) (directionsToUse []int, match bool) {
 	switch plr {
 	case BluePlayer:
