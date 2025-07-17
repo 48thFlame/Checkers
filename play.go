@@ -35,6 +35,7 @@ func PlaySimpleGame(plr1blue, plr2red gamePlayerFunc) {
 		fmt.Printf("%s went: %v\n", plrToGoName, move)
 		g.PlayMove(move)
 		fmt.Print(g)
+		fmt.Println("--------------------")
 	}
 }
 
@@ -85,6 +86,7 @@ func PlayTimedGame(plr1blue, plr2red timedMoveInputFunc, timeLimit time.Duration
 		fmt.Printf("%s went: %v\n", plrToGoName, move)
 		g.PlayMove(move)
 		fmt.Print(g)
+		fmt.Println("--------------------")
 	}
 }
 

@@ -4,8 +4,6 @@ import (
 	"github.com/48thFlame/Checkers/checkers"
 )
 
-//TODO: https://g.co/gemini/share/d5b2955d26b2
-
 const (
 	highestE = 199_999_999
 	lowestE  = highestE * -1
@@ -40,10 +38,10 @@ type heatMap [checkers.BoardSize]int
 
 var (
 	piecesHeatMap = heatMap{
-		-0, 8, -0, 8, -0, 8, -0, 6,
+		-0, 15, -0, 2, -0, 15, -0, 2,
 		2, -0, 2, -0, 2, -0, 1, -0,
 		-0, 6, -0, 6, -0, 6, -0, 6,
-		9, -0, 10, -0, 10, -0, 10, -0,
+		9, -0, 13, -0, 13, -0, 10, -0,
 		-0, 4, -0, 5, -0, 5, -0, 11,
 		3, -0, 0, -0, 0, -0, 0, -0,
 		-0, 16, -0, 18, -0, 18, -0, 15, // hoping doesn't end calculation when can be captured
@@ -83,12 +81,20 @@ func evaluateMidPosition(agd aiGameData) (eval int) {
 		}
 	}
 
+	nOfLegalMoves := len(agd.g.GetLegalMoves())
+
+	if agd.g.PlrTurn == checkers.BluePlayer {
+		eval += nOfLegalMoves
+	} else {
+		eval -= nOfLegalMoves
+	}
+
 	return eval
 }
 
 const (
-	endPieceWeightE = 70
-	endKingWeightE  = 150
+	endPieceWeightE = 97
+	endKingWeightE  = 135
 	endPiecePunishE = 5
 )
 
@@ -172,6 +178,13 @@ func evaluateEndGamePos(agd aiGameData) (eval int) {
 			eval -= distScore
 			eval += agd.nBlue * endPiecePunishE
 		}
+	}
+
+	nOfLegalMoves := len(agd.g.GetLegalMoves())
+	if agd.g.PlrTurn == checkers.BluePlayer {
+		eval += nOfLegalMoves
+	} else {
+		eval -= nOfLegalMoves
 	}
 
 	return eval
