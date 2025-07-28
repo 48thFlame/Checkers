@@ -9,18 +9,14 @@
     padding: 0;
 }
 
-
 :root {
     --bg-color: hsl(0, 0%, 16%);
     --txt-color: hsl(0, 0%, 84%);
-    --light-slot-color: #d8dacf;
-    --dark-slot-color: hsl(60, 3%, 42%);
-    --startI-slot-color: hsl(60, 3%, 26%);
 }
 
 body {
+    font-family: sans-serif;
     background-color: var(--bg-color);
-    font-family: fantasy, Tahoma, sans-serif;
     color: var(--txt-color);
 
     width: 100vw;
@@ -35,89 +31,6 @@ body {
     justify-content: center;
     align-items: center;
     flex-direction: column;
-}
-
-.checker-board {
-    display: grid;
-    gap: 1px;
-    aspect-ratio: 1/1;
-    overflow: hidden;
-    user-select: none;
-}
-
-
-.game-state {
-    z-index: 10;
-    background-color: rgba(128, 128, 128, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.game-state-text {
-    color: #000000;
-    font-size: xx-large;
-    font-weight: bold;
-}
-
-.slot {
-    width: 100%;
-    height: 100%;
-
-    /* unless its a NaS, it should be dark*/
-    background-color: var(--dark-slot-color);
-    color: var(--light-slot-color);
-
-    /* pointer-events: auto; */
-    position: relative;
-}
-
-.NaS {
-    background-color: var(--light-slot-color);
-    width: 100%;
-    height: 100%;
-}
-
-.piece {
-    width: 100%;
-    height: 100%;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.piece-img {
-    width: 90%;
-    height: 90%;
-}
-
-.slot-i {
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    z-index: 1;
-}
-
-.startI-slot {
-    background-color: var(--startI-slot-color);
-}
-
-.selectedI-slot {
-    border: 3px solid greenyellow;
-}
-
-.endI-slot {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.endI-slot-circle {
-    background-color: yellowgreen;
-    border-radius: 50%;
-    width: 25%;
-    height: 25%;
 }
 
 .control-area {

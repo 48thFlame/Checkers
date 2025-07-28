@@ -4,13 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <title>Checkers</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="board.css">
     <script src="wasm_exec.js"></script>
     <script src="elm.js"></script>
 </head>
 
 <body>
-    <div id="checkers-app"></div>
+    <div id="main-app-is-here"></div>
     <script type="module">
         // load the WASM
         const go = new Go();
@@ -20,7 +21,7 @@
 
         // start Elm
         const app = Elm.Main.init({
-            node: document.getElementById("checkers-app")
+            node: document.getElementById("main-app-is-here")
         });
 
         app.ports.actionRequest.subscribe(function (request) {

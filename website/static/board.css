@@ -1,0 +1,87 @@
+:root {
+    --light-slot-color: #d8dacf;
+    --dark-slot-color: hsl(60, 3%, 42%);
+    --startI-slot-color: hsl(60, 3%, 26%);
+}
+
+.checker-board {
+    display: grid;
+    aspect-ratio: 1/1;
+    overflow: hidden;
+    user-select: none;
+    border: 5px solid var(--dark-slot-color);
+}
+
+.game-state {
+    z-index: 10;
+    background-color: rgba(128, 128, 128, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.game-state-text {
+    color: #000000;
+    font-size: xx-large;
+    font-weight: bold;
+}
+
+.outer-slot {
+    /* unless its a NaS, it should be dark*/
+    background-color: var(--dark-slot-color);
+    color: var(--light-slot-color);
+
+    position: relative;
+}
+
+.NaS-type-slot {
+    background-color: var(--light-slot-color);
+    width: 100%;
+    height: 100%;
+}
+
+.inside-slot-house-of-piece {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.piece-img-element {
+    --piece-size: 80%;
+    width: var(--piece-size);
+    height: var(--piece-size);
+}
+
+.slot-i-span-indicator {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    z-index: 1;
+}
+
+.starting-legal-move-slot {
+    background-color: var(--startI-slot-color);
+    cursor: grab;
+}
+
+.selected-slot-to-make-move {
+    outline: 3px solid greenyellow;
+    z-index: 1;
+    cursor: grabbing;
+}
+
+.ending-legal-move-slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ending-legal-move-circle-indicator {
+    background-color: yellowgreen;
+    border-radius: 50%;
+    width: 25%;
+    height: 25%;
+}
