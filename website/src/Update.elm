@@ -55,16 +55,22 @@ update msg model =
             -- TODO: verify that didn't change opponents in the mean time
             -- new game appeared, should make next move
             let
+                lgd =
+                    model.lgd
+
                 -- so needs to figure out who that is that should make next move
                 opponentToGo =
                     if rg.plrTurn == 0 then
-                        model.plr1blue
+                        lgd.plr1blue
 
                     else
-                        model.plr2red
+                        lgd.plr2red
+
+                updatedLgd =
+                    { lgd | rg = rg, legalMoves = [], selectedStartI = Nothing }
             in
             -- reset the model
-            ( { model | rg = rg, legalMoves = [], selectedStartI = Nothing }
+            ( { model | lgd = updatedLgd }
             , if rg.state == "Playing" then
                 case opponentToGo of
                     Human ->
@@ -86,48 +92,104 @@ update msg model =
             ( model, translator action )
 
         LegalMovesAppeared moves ->
-            ( { model | legalMoves = moves }, Cmd.none )
+            let
+                lgd =
+                    model.lgd
+
+                updatedLgd =
+                    { lgd | legalMoves = moves }
+            in
+            ( { model | lgd = updatedLgd }, Cmd.none )
 
         ChangePlr1 s ->
-            ( { model | futurePlr1blue = getPlrSelected s }, Cmd.none )
+            let
+                lgd =
+                    model.lgd
+
+                updatedLgd =
+                    { lgd | futurePlr1blue = getPlrSelected s }
+            in
+            ( { model | lgd = updatedLgd }, Cmd.none )
 
         ChangePlr2 s ->
-            ( { model | futurePlr2red = getPlrSelected s }, Cmd.none )
+            let
+                lgd =
+                    model.lgd
+
+                updatedLgd =
+                    { lgd | futurePlr2red = getPlrSelected s }
+            in
+            ( { model | lgd = updatedLgd }, Cmd.none )
 
         NewGame ->
+            let
+                lgd =
+                    model.lgd
+
+                updatedLgd =
+                    { lgd | plr1blue = lgd.futurePlr1blue, plr2red = lgd.futurePlr2red }
+            in
             -- flip future players to current
             -- start new game by calling update
-            { model | plr1blue = model.futurePlr1blue, plr2red = model.futurePlr2red }
+            { model | lgd = updatedLgd }
                 |> update (UpdatedGameAppeared startingRawGame)
 
         FlipBoard ->
-            ( { model | boardFlipped = not model.boardFlipped }, Cmd.none )
+            let
+                lgd =
+                    model.lgd
+
+                updatedLgd =
+                    { lgd | boardFlipped = not lgd.boardFlipped }
+            in
+            ( { model | lgd = updatedLgd }, Cmd.none )
 
         StartSlotSelected i ->
-            ( { model
-                | selectedStartI =
-                    if model.selectedStartI == Just i then
-                        -- if wants to un-select
-                        Nothing
+            let
+                lgd =
+                    model.lgd
 
-                    else
-                        Just i
-              }
+                updatedLgd =
+                    { lgd
+                        | selectedStartI =
+                            if lgd.selectedStartI == Just i then
+                                -- if wants to un-select
+                                Nothing
+
+                            else
+                                Just i
+                    }
+            in
+            ( { model | lgd = updatedLgd }
             , Cmd.none
             )
 
         UnselectStartI ->
-            ( { model | selectedStartI = Nothing }, Cmd.none )
+            let
+                lgd =
+                    model.lgd
+
+                updatedLgd =
+                    { lgd | selectedStartI = Nothing }
+            in
+            ( { model | lgd = updatedLgd }, Cmd.none )
 
         EndSlotSelected i ->
+            let
+                lgd =
+                    model.lgd
+
+                updatedLgd =
+                    { lgd | selectedStartI = Nothing }
+            in
             -- should only be possible to get here if model.selectedStartI is a value
-            case model.selectedStartI of
+            case lgd.selectedStartI of
                 Nothing ->
                     ( model, Cmd.none )
 
                 Just si ->
-                    ( { model | selectedStartI = Nothing }
-                    , translator (MakeMove model.rg { startI = si, endI = i })
+                    ( { model | lgd = updatedLgd }
+                    , translator (MakeMove model.lgd.rg { startI = si, endI = i })
                     )
 
 

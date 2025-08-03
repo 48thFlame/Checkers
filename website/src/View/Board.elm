@@ -3,7 +3,7 @@ module View.Board exposing (viewBoard)
 import Html
 import Html.Attributes exposing (alt, class, draggable, src, style)
 import Html.Events exposing (onMouseDown, onMouseUp)
-import Model exposing (Model, Move)
+import Model exposing (LocalGameData, Move)
 import Set exposing (Set)
 import Update exposing (Msg(..))
 
@@ -209,8 +209,9 @@ viewBoardSlot isBoardFlipped i ( piece, flag ) =
 
         Selected ->
             Html.div
-                ([ class "starting-legal-move-slot selected-slot-to-make-move", deSelectStartIEvent
-                ]
+                ([ class "starting-legal-move-slot selected-slot-to-make-move"
+                 , deSelectStartIEvent
+                 ]
                     ++ baseAttrs
                 )
                 [ pieceSlot ]
@@ -223,7 +224,7 @@ viewBoardSlot isBoardFlipped i ( piece, flag ) =
                 ]
 
 
-viewBoard : Model -> Html.Html Msg
+viewBoard : LocalGameData -> Html.Html Msg
 viewBoard model =
     let
         pieces : List PieceSlot
@@ -270,11 +271,13 @@ viewBoard model =
         [ class "checker-board"
         , style "grid-template-rows" "repeat(8, 1fr)"
         , style "grid-template-columns" "repeat(8, 1fr)"
-        ,  style "cursor" (if model.selectedStartI /= Nothing then
-             "grabbing"
-         else "default"
-           )
-            
+        , style "cursor"
+            (if model.selectedStartI /= Nothing then
+                "grabbing"
+
+             else
+                "default"
+            )
         ]
         (viewSlots
             |> (if model.rg.state /= "Playing" then

@@ -3,7 +3,7 @@ module View.Control exposing (viewControl)
 import Html
 import Html.Attributes exposing (attribute, class, for, id, selected, value)
 import Html.Events exposing (onClick, onInput)
-import Model exposing (AiDifficulty(..), Model, Opponent(..), aiDifficulties)
+import Model exposing (AiDifficulty(..), LocalGameData, Opponent(..), aiDifficulties)
 import Update exposing (Msg(..))
 
 
@@ -66,7 +66,7 @@ plrSelect labelText currentOpp selectionHtmlId changeDiffMsg =
         ]
 
 
-viewControl : Model -> Html.Html Msg
+viewControl : LocalGameData -> Html.Html Msg
 viewControl model =
     Html.div [ class "control" ]
         [ plrSelect "Player 1:" model.futurePlr1blue "plr1-select-id" ChangePlr1

@@ -3,20 +3,22 @@ module Model exposing (..)
 
 init : () -> ( Model, Cmd msg )
 init _ =
-    ( { rg = startingRawGame
-      , legalMoves = []
-      , selectedStartI = Nothing
-      , boardFlipped = False
-      , plr1blue = Human
-      , plr2red = Ai Simple
-      , futurePlr1blue = Human
-      , futurePlr2red = Ai Simple
+    ( { lgd =
+            { rg = startingRawGame
+            , legalMoves = []
+            , selectedStartI = Nothing
+            , boardFlipped = False
+            , plr1blue = Human
+            , plr2red = Ai Simple
+            , futurePlr1blue = Human
+            , futurePlr2red = Ai Simple
+            }
       }
     , Cmd.none
     )
 
 
-type alias Model =
+type alias LocalGameData =
     { rg : RawGame -- see `RawGame` doc
     , legalMoves : List Move
     , selectedStartI : Maybe Int
@@ -29,6 +31,11 @@ type alias Model =
     -- the ones that will play once presses the play button
     , futurePlr1blue : Opponent
     , futurePlr2red : Opponent
+    }
+
+
+type alias Model =
+    { lgd : LocalGameData
     }
 
 
