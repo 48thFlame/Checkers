@@ -5,12 +5,16 @@
 }
 
 .checker-board {
+    max-height: 100%;
+    max-width: 100%;
+
     display: grid;
     aspect-ratio: 1/1;
-    overflow: hidden;
     user-select: none;
     border: 5px solid var(--dark-slot-color);
 }
+
+/* TODO: make "game-state" part good */
 
 .game-state {
     z-index: 10;

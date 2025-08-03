@@ -1,0 +1,29 @@
+.control {
+    height: 100%;
+
+    display: flex;
+    gap: 6px;
+    flex-direction: column;
+    align-items: center;
+}
+
+.flipBoard-button {
+    margin-top: auto;
+
+    width: 100%;
+    font-size: large;
+    padding: 3px;
+}
+
+#plr1-select-id {
+    background-color: hsl(212, 71%, 67%);
+}
+
+#plr2-select-id {
+    background-color: hsl(0, 71%, 67%);
+}
+
+.plr-select {
+    border: none;
+    padding: 3px;
+}

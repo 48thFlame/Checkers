@@ -1,4 +1,4 @@
-module Update exposing (..)
+module Update exposing (Msg(..), subscriptions, update)
 
 import Model exposing (..)
 import Process
@@ -51,6 +51,8 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         UpdatedGameAppeared rg ->
+            -- ! important
+            -- TODO: verify that didn't change opponents in the mean time
             -- new game appeared, should make next move
             let
                 -- so needs to figure out who that is that should make next move
