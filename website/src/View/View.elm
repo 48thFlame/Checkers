@@ -10,9 +10,11 @@ import View.Control exposing (viewControl)
 
 view : Model -> Html.Html Msg
 view model =
-    Html.div [ class "app" ]
-        [ viewBoard model.lgd
-        , viewControl model.lgd
+    Html.div [ class "app-container" ]
+        [ Html.div [ class "app" ]
+            [ viewBoard model.lgd
+            , viewControl model
+            ]
         ]
 
 

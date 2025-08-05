@@ -3,7 +3,7 @@ module View.Control exposing (viewControl)
 import Html
 import Html.Attributes exposing (attribute, class, for, id, selected, value)
 import Html.Events exposing (onClick, onInput)
-import Model exposing (AiDifficulty(..), LocalGameData, Opponent(..), aiDifficulties)
+import Model exposing (AiDifficulty(..), Model, Opponent(..), Tab(..), aiDifficulties)
 import Update exposing (Msg(..))
 
 
@@ -66,13 +66,46 @@ plrSelect labelText currentOpp selectionHtmlId changeDiffMsg =
         ]
 
 
-viewControl : LocalGameData -> Html.Html Msg
+tab : Tab -> Html.Html Msg
+tab t =
+    let
+        stringedTab =
+            case t of
+                Local ->
+                    "Local"
+
+                Online ->
+                    "Online"
+    in
+    Html.button [ class "tab-switcher-button", onClick (ChangeTab t) ] [ Html.text stringedTab ]
+
+
+viewControl : Model -> Html.Html Msg
 viewControl model =
+    let
+        tabSwitcherArea =
+            Html.div []
+                [ tab Local
+                , tab Online
+                ]
+
+        localButtonsArea =
+            Html.div
+                [ if model.tab == Local then
+                    class "local-tab"
+
+                  else
+                    class "non-active-tab"
+                ]
+                [ plrSelect "Player 1:" model.lgd.futurePlr1blue "plr1-select-id" ChangePlr1
+                , plrSelect "Player 2:" model.lgd.futurePlr2red "plr2-select-id" ChangePlr2
+                , Html.button [ class "newGame-button", onClick NewGame ]
+                    [ Html.text "Play!" ]
+                ]
+    in
     Html.div [ class "control" ]
-        [ plrSelect "Player 1:" model.futurePlr1blue "plr1-select-id" ChangePlr1
-        , plrSelect "Player 2:" model.futurePlr2red "plr2-select-id" ChangePlr2
-        , Html.button [ class "newGame-button", onClick NewGame ]
-            [ Html.text "Play!" ]
+        [ tabSwitcherArea
+        , localButtonsArea
         , Html.button [ class "flipBoard-button", onClick FlipBoard ]
             [ Html.text "Flip Board" ]
         ]

@@ -1,18 +1,22 @@
 .control {
     height: 100%;
+    max-width: 250px;
+    min-width: fit-content;
+
+    flex: 1;
+    align-self: flex-start;
 
     display: flex;
-    gap: 6px;
     flex-direction: column;
-    align-items: center;
+    gap: 6px;
 }
 
-.flipBoard-button {
-    margin-top: auto;
+.tab-switcher-button {
+    width: 50%;
+}
 
-    width: 100%;
-    font-size: large;
-    padding: 3px;
+.non-active-tab {
+    display: none;
 }
 
 #plr1-select-id {
@@ -25,5 +29,12 @@
 
 .plr-select {
     border: none;
+    padding: 3px;
+}
+
+.flipBoard-button {
+    margin-top: auto;
+
+    width: 100%;
     padding: 3px;
 }

@@ -7,7 +7,8 @@ import Translator exposing (..)
 
 
 type Msg
-    = UpdatedGameAppeared RawGame
+    = ChangeTab Tab
+    | UpdatedGameAppeared RawGame
     | LegalMovesAppeared (List Move)
     | MakeAction JsActions
     | ChangePlr1 String
@@ -50,6 +51,9 @@ getPlrSelected s =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        ChangeTab newTab ->
+            ( { model | tab = newTab }, Cmd.none )
+
         UpdatedGameAppeared rg ->
             -- ! important
             -- TODO: verify that didn't change opponents in the mean time

@@ -13,9 +13,21 @@ init _ =
             , futurePlr1blue = Human
             , futurePlr2red = Ai Simple
             }
+      , tab = Local
       }
     , Cmd.none
     )
+
+
+type alias Model =
+    { lgd : LocalGameData
+    , tab : Tab
+    }
+
+
+type Tab
+    = Local
+    | Online
 
 
 type alias LocalGameData =
@@ -31,11 +43,6 @@ type alias LocalGameData =
     -- the ones that will play once presses the play button
     , futurePlr1blue : Opponent
     , futurePlr2red : Opponent
-    }
-
-
-type alias Model =
-    { lgd : LocalGameData
     }
 
 
